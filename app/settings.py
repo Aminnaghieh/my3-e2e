@@ -1,14 +1,19 @@
 """
 app/settings.py
 ===============
-تنظیمات Django برای محیط‌های development و production.
+Django settings for development and production.
 
-متغیرهای محیطی مهم (در Render باید ست کنید):
-  SECRET_KEY      → یه رشته تصادفی طولانی (اجباری در production)
-  DEBUG           → "False" در production
-  ALLOWED_HOSTS   → دامنه Render شما، مثل "my-app.onrender.com"
-  BOT_TOKEN       → توکن ربات تلگرام از BotFather
-  ALLOWED_TG_IDS  → آیدی‌های تلگرام که اجازه دارن (مثل "123,456")
+Environment variables (set in Render):
+  SECRET_KEY       - Random long string (required in production)
+  DEBUG            - "False" in production
+  ALLOWED_HOSTS    - Your Render domain, e.g. "my-app.onrender.com"
+  BOT_TOKEN        - Telegram bot token from BotFather
+  ALLOWED_TG_IDS   - Comma-separated Telegram IDs, e.g. "123,456"
+  CLOUDINARY_CLOUD_NAME  - Cloudinary cloud name
+  CLOUDINARY_API_KEY     - Cloudinary API key
+  CLOUDINARY_API_SECRET  - Cloudinary API secret
+  GEMINI_API_KEY   - Google Gemini API key
+  WEB_APP_URL      - Full URL of the deployed app
 """
 
 import os
@@ -17,7 +22,6 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # ── Security ──────────────────────────────────────────────────────────────────
-# در production حتماً SECRET_KEY رو از environment بخونید
 SECRET_KEY = os.environ.get(
     "SECRET_KEY",
     "dev-only-insecure-key-change-in-production-please"
@@ -25,11 +29,10 @@ SECRET_KEY = os.environ.get(
 
 DEBUG = os.environ.get("DEBUG", "True") == "True"
 
-# دامنه‌های مجاز - در Render باید دامنه render.com رو اضافه کنید
 ALLOWED_HOSTS_ENV = os.environ.get("ALLOWED_HOSTS", "")
 ALLOWED_HOSTS = [h.strip() for h in ALLOWED_HOSTS_ENV.split(",") if h.strip()]
 if DEBUG or not ALLOWED_HOSTS:
-    ALLOWED_HOSTS = ["*"]  # فقط برای development
+    ALLOWED_HOSTS = ["*"]
 
 # ── Apps ──────────────────────────────────────────────────────────────────────
 INSTALLED_APPS = [
@@ -39,16 +42,15 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "core",  # اپ اصلی پروژه ما
+    "core",
 ]
 
 # ── Middleware ────────────────────────────────────────────────────────────────
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",  # سرو static files در production
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
-    # CSRF برای API endpointهایی که با @csrf_exempt مشخص نشدن فعاله
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
@@ -61,7 +63,7 @@ ROOT_URLCONF = "app.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "templates"],  # فایل index.html مینی‌اپ اینجاست
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -77,8 +79,6 @@ TEMPLATES = [
 WSGI_APPLICATION = "app.wsgi.application"
 
 # ── Database ──────────────────────────────────────────────────────────────────
-# SQLite کافیه چون فقط دو نفریم و داده زیادی نداریم
-# اگه خواستید بعداً به PostgreSQL مهاجرت کنید، فقط این بخش رو عوض کنید
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
@@ -87,7 +87,7 @@ DATABASES = {
 }
 
 # ── Internationalization ──────────────────────────────────────────────────────
-LANGUAGE_CODE = "fa-ir"
+LANGUAGE_CODE = "en-us"
 TIME_ZONE = "Asia/Tehran"
 USE_I18N = True
 USE_TZ = True
@@ -95,16 +95,34 @@ USE_TZ = True
 # ── Static Files ──────────────────────────────────────────────────────────────
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
-# whitenoise برای سرو static در production بدون nginx
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# ── Bot Config (read-only در settings - استفاده در bot.py) ───────────────────
+# ── Bot Config ────────────────────────────────────────────────────────────────
 BOT_TOKEN = os.environ.get("BOT_TOKEN", "")
 
-# آیدی‌های تلگرام مجاز - از environment بخون
+# Allowed Telegram IDs - only these users can access the mini-app
 _allowed_raw = os.environ.get("ALLOWED_TG_IDS", "")
 ALLOWED_TG_IDS = [
     int(i.strip()) for i in _allowed_raw.split(",") if i.strip().isdigit()
 ]
+
+# ── Cloudinary Config ─────────────────────────────────────────────────────────
+CLOUDINARY_CLOUD_NAME = os.environ.get("CLOUDINARY_CLOUD_NAME", "")
+CLOUDINARY_API_KEY = os.environ.get("CLOUDINARY_API_KEY", "")
+CLOUDINARY_API_SECRET = os.environ.get("CLOUDINARY_API_SECRET", "")
+
+# ── Gemini Config ─────────────────────────────────────────────────────────────
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
+
+# ── Web App URL ───────────────────────────────────────────────────────────────
+WEB_APP_URL = os.environ.get("WEB_APP_URL", "https://your-app.onrender.com")
+
+# ── Media Cleanup ─────────────────────────────────────────────────────────────
+# Days after which media files are auto-deleted from Cloudinary
+MEDIA_RETENTION_DAYS = int(os.environ.get("MEDIA_RETENTION_DAYS", "30"))
+
+# ── File Upload Limits ────────────────────────────────────────────────────────
+DATA_UPLOAD_MAX_MEMORY_SIZE = 20 * 1024 * 1024  # 20MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 20 * 1024 * 1024   # 20MB

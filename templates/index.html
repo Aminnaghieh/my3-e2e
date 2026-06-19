@@ -1,33 +1,47 @@
 <!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>روتین ما</title>
-
-  <!-- اسکریپت رسمی تلگرام - اول از همه لود بشه -->
+  <title>Our Space</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
   <style>
     /* ═══════════════════════════════════════════════════════════════
-       DESIGN TOKENS
-       رنگ‌ها، فونت‌ها، و متغیرهای طراحی
+       DESIGN TOKENS — Dark Fitness Theme
+       Pure black + dark gray | Neon orange accent | Metallic silver
     ═══════════════════════════════════════════════════════════════ */
     :root {
-      --bg:          #0d0f14;
-      --surface:     #161a23;
-      --surface-2:   #1e2330;
-      --border:      #252a38;
-      --accent:      #6c63ff;      /* بنفش - رنگ اصلی */
-      --accent-soft: rgba(108, 99, 255, 0.15);
-      --green:       #2dd4a0;
-      --red:         #ff5f7e;
-      --yellow:      #f7c948;
-      --text:        #e8eaf0;
-      --text-muted:  #7a8099;
-      --radius:      14px;
-      --radius-sm:   8px;
-      --font:        'Vazirmatn', system-ui, -apple-system, sans-serif;
+      --bg:          #000000;
+      --surface:     #111111;
+      --surface-2:   #1a1a1a;
+      --surface-3:   #222222;
+      --border:      #2a2a2a;
+      --border-light:#333333;
+
+      --accent:      #FF6B00;       /* Neon orange */
+      --accent-dim:  #CC5500;
+      --accent-soft: rgba(255, 107, 0, 0.12);
+      --accent-glow: rgba(255, 107, 0, 0.4);
+
+      --silver:      #C0C0C0;       /* Metallic silver */
+      --silver-dim:  #888888;
+
+      --green:       #00FF88;
+      --red:         #FF3B5C;
+      --yellow:      #FFD700;
+      --blue:        #4DA6FF;
+
+      --text:        #F0F0F0;
+      --text-muted:  #777777;
+      --text-dim:    #555555;
+
+      --radius:      10px;
+      --radius-sm:   6px;
+      --radius-lg:   16px;
+
+      --font:        'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      --font-mono:   'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
     }
 
     /* ═══════════════════════════════════════════════════════════════
@@ -35,22 +49,30 @@
     ═══════════════════════════════════════════════════════════════ */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    html { font-size: 15px; }
+
     body {
       font-family: var(--font);
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
-      /* فضا برای نوار پایین */
-      padding-bottom: 76px;
+      padding-bottom: 72px;
       overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
     }
 
     button { cursor: pointer; border: none; font-family: var(--font); }
-    input, textarea {
+    input, textarea, select {
       font-family: var(--font);
       outline: none;
       border: none;
+      background: transparent;
+      color: var(--text);
     }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
     /* ═══════════════════════════════════════════════════════════════
        LOADING SCREEN
@@ -58,12 +80,9 @@
     #loading {
       position: fixed; inset: 0;
       background: var(--bg);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
-      z-index: 999;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 16px; z-index: 999;
       transition: opacity 0.4s ease;
     }
     #loading.hidden { opacity: 0; pointer-events: none; }
@@ -72,10 +91,10 @@
       border: 3px solid var(--border);
       border-top-color: var(--accent);
       border-radius: 50%;
-      animation: spin 0.8s linear infinite;
+      animation: spin 0.7s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .loader-text { color: var(--text-muted); font-size: 14px; }
+    .loader-text { color: var(--text-muted); font-size: 13px; letter-spacing: 1px; text-transform: uppercase; }
 
     /* ═══════════════════════════════════════════════════════════════
        HEADER
@@ -84,78 +103,71 @@
       position: sticky; top: 0; z-index: 10;
       background: var(--bg);
       border-bottom: 1px solid var(--border);
-      padding: 12px 16px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
+      padding: 10px 14px;
+      display: flex; align-items: center; gap: 10px;
     }
     .header-vibes {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex: 1;
+      display: flex; align-items: center; gap: 8px; flex: 1;
     }
     .vibe-pill {
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      display: flex; align-items: center; gap: 5px;
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 20px;
       padding: 4px 10px;
-      font-size: 13px;
+      font-size: 12px;
       cursor: pointer;
       transition: border-color 0.2s;
     }
     .vibe-pill:hover { border-color: var(--accent); }
-    .vibe-pill .emoji { font-size: 18px; }
-    .vibe-pill .label { color: var(--text-muted); font-size: 12px; }
-
-    .header-sep {
-      color: var(--text-muted);
-      font-size: 18px;
-    }
-
+    .vibe-pill .emoji { font-size: 16px; }
+    .vibe-pill .label { color: var(--text-muted); font-size: 11px; }
+    .header-sep { color: var(--border-light); font-size: 16px; }
     .partner-vibe {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 13px;
-      color: var(--text-muted);
+      display: flex; align-items: center; gap: 5px;
+      font-size: 12px; color: var(--text-muted);
     }
-    .partner-vibe .emoji { font-size: 18px; }
+    .partner-vibe .emoji { font-size: 16px; }
+    .online-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--green);
+      display: inline-block;
+      box-shadow: 0 0 6px var(--green);
+    }
+    .offline-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--text-dim);
+      display: inline-block;
+    }
 
     /* ═══════════════════════════════════════════════════════════════
-       TAB BAR (نوار پایین)
+       TAB BAR
     ═══════════════════════════════════════════════════════════════ */
     #tab-bar {
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
+      position: fixed; bottom: 0; left: 0; right: 0;
       background: var(--surface);
       border-top: 1px solid var(--border);
       display: grid;
-      grid-template-columns: repeat(5, 1fr);
+      grid-template-columns: repeat(6, 1fr);
       z-index: 10;
     }
     .tab-btn {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 8px 4px;
-      gap: 3px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 6px 2px; gap: 2px;
       background: transparent;
-      color: var(--text-muted);
-      font-size: 10px;
+      color: var(--text-dim);
+      font-size: 9px;
       transition: color 0.2s;
+      letter-spacing: 0.5px;
     }
-    .tab-btn .tab-icon { font-size: 20px; }
+    .tab-btn .tab-icon { font-size: 18px; }
     .tab-btn.active { color: var(--accent); }
 
     /* ═══════════════════════════════════════════════════════════════
-       SCREENS (محتوای هر تب)
+       SCREENS
     ═══════════════════════════════════════════════════════════════ */
-    .screen { display: none; padding: 16px; }
+    .screen { display: none; padding: 12px; }
     .screen.active { display: block; }
 
     /* ═══════════════════════════════════════════════════════════════
@@ -165,270 +177,262 @@
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 14px;
-      margin-bottom: 10px;
+      padding: 12px;
+      margin-bottom: 8px;
     }
     .card-title {
-      font-size: 11px;
+      font-size: 10px;
       text-transform: uppercase;
-      letter-spacing: 1px;
-      color: var(--text-muted);
-      margin-bottom: 12px;
+      letter-spacing: 1.5px;
+      color: var(--accent);
+      margin-bottom: 10px;
+      font-weight: 700;
     }
 
     /* ═══════════════════════════════════════════════════════════════
        INPUT GROUP
     ═══════════════════════════════════════════════════════════════ */
     .input-group {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 14px;
+      display: flex; gap: 6px; margin-bottom: 10px;
     }
     .input-field {
       flex: 1;
       background: var(--surface-2);
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
-      padding: 10px 12px;
+      padding: 9px 11px;
       color: var(--text);
-      font-size: 14px;
+      font-size: 13px;
       transition: border-color 0.2s;
     }
     .input-field:focus { border-color: var(--accent); }
-    .input-field::placeholder { color: var(--text-muted); }
+    .input-field::placeholder { color: var(--text-dim); }
 
     .btn {
       background: var(--accent);
-      color: #fff;
+      color: #000;
       border-radius: var(--radius-sm);
-      padding: 10px 16px;
-      font-size: 14px;
-      font-weight: 600;
+      padding: 9px 14px;
+      font-size: 13px;
+      font-weight: 700;
       transition: opacity 0.2s, transform 0.1s;
       white-space: nowrap;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
-    .btn:active { transform: scale(0.97); opacity: 0.9; }
+    .btn:active { transform: scale(0.96); opacity: 0.9; }
     .btn-ghost {
       background: transparent;
       border: 1px solid var(--border);
       color: var(--text-muted);
     }
-    .btn-sm {
-      padding: 6px 12px;
-      font-size: 12px;
-    }
-    .btn-danger { background: var(--red); }
+    .btn-sm { padding: 5px 10px; font-size: 11px; }
+    .btn-danger { background: var(--red); color: #fff; }
+    .btn-silver { background: var(--silver-dim); color: #fff; }
 
     /* ═══════════════════════════════════════════════════════════════
-       NOTES (دیلی نوت)
+       NOTES
     ═══════════════════════════════════════════════════════════════ */
     .note-item {
-      display: flex;
-      gap: 10px;
-      padding: 10px 0;
+      display: flex; gap: 8px; padding: 8px 0;
       border-bottom: 1px solid var(--border);
     }
     .note-item:last-child { border-bottom: none; }
     .note-avatar {
-      width: 32px; height: 32px;
+      width: 28px; height: 28px;
       border-radius: 50%;
       background: var(--accent-soft);
       display: flex; align-items: center; justify-content: center;
-      font-size: 16px;
-      flex-shrink: 0;
+      font-size: 14px; flex-shrink: 0;
     }
-    .note-body { flex: 1; }
+    .note-body { flex: 1; min-width: 0; }
     .note-meta {
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-bottom: 3px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      font-size: 10px; color: var(--text-dim);
+      margin-bottom: 2px; display: flex;
+      align-items: center; gap: 5px;
     }
-    .note-text { font-size: 14px; line-height: 1.6; }
-    .note-mine { background: var(--accent-soft); border-radius: var(--radius-sm); padding: 8px 10px; }
-    .note-pin-badge {
-      font-size: 10px;
-      background: var(--yellow);
-      color: #000;
-      padding: 1px 5px;
-      border-radius: 4px;
+    .note-text { font-size: 13px; line-height: 1.5; }
+    .note-mine { background: var(--accent-soft); border-radius: var(--radius-sm); padding: 6px 8px; }
+    .note-media {
+      margin-top: 6px; border-radius: var(--radius-sm);
+      max-width: 100%; max-height: 200px;
+      object-fit: cover; cursor: pointer;
+    }
+    .note-media-audio {
+      width: 100%; margin-top: 6px;
     }
     .mood-tags {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-bottom: 10px;
+      display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px;
     }
     .mood-tag {
-      font-size: 20px;
-      cursor: pointer;
-      padding: 4px;
-      border-radius: 6px;
-      transition: background 0.15s;
+      font-size: 18px; cursor: pointer; padding: 3px;
+      border-radius: 4px; transition: background 0.15s;
     }
     .mood-tag:hover, .mood-tag.selected { background: var(--accent-soft); }
 
     /* ═══════════════════════════════════════════════════════════════
-       TODO LIST
+       TODO
     ═══════════════════════════════════════════════════════════════ */
     .todo-section-title {
-      font-size: 11px;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin: 16px 0 8px;
+      font-size: 10px; color: var(--accent);
+      text-transform: uppercase; letter-spacing: 1.5px;
+      margin: 12px 0 6px; font-weight: 700;
     }
     .todo-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 12px;
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 10px;
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
-      margin-bottom: 6px;
+      margin-bottom: 4px;
       transition: opacity 0.3s;
     }
-    .todo-item.done { opacity: 0.5; }
+    .todo-item.done { opacity: 0.4; }
     .todo-checkbox {
-      width: 22px; height: 22px;
-      border-radius: 6px;
+      width: 20px; height: 20px;
+      border-radius: 4px;
       border: 2px solid var(--border);
       background: transparent;
       display: flex; align-items: center; justify-content: center;
-      cursor: pointer;
-      flex-shrink: 0;
-      transition: all 0.2s;
+      cursor: pointer; flex-shrink: 0; transition: all 0.2s;
     }
     .todo-checkbox.checked {
-      background: var(--green);
-      border-color: var(--green);
+      background: var(--green); border-color: var(--green);
     }
-    .todo-checkbox.checked::after { content: "✓"; color: #fff; font-size: 13px; font-weight: bold; }
-    .todo-title {
-      flex: 1;
-      font-size: 14px;
-    }
-    .todo-title.done-text { text-decoration: line-through; color: var(--text-muted); }
+    .todo-checkbox.checked::after { content: "✓"; color: #000; font-size: 12px; font-weight: 900; }
+    .todo-title { flex: 1; font-size: 13px; min-width: 0; }
+    .todo-title.done-text { text-decoration: line-through; color: var(--text-dim); }
     .priority-badge {
-      font-size: 10px;
-      padding: 2px 6px;
-      border-radius: 4px;
-      background: var(--surface-2);
-      color: var(--text-muted);
+      font-size: 9px; padding: 1px 5px;
+      border-radius: 3px; background: var(--surface-2);
+      color: var(--text-dim); font-weight: 700;
     }
-    .priority-3 { background: rgba(255, 95, 126, 0.2); color: var(--red); }
+    .priority-3 { background: rgba(255, 59, 92, 0.2); color: var(--red); }
+    .call-badge {
+      font-size: 9px; padding: 1px 5px;
+      border-radius: 3px; background: rgba(77, 166, 255, 0.2);
+      color: var(--blue); font-weight: 700;
+    }
+    .schedule-info {
+      font-size: 10px; color: var(--silver-dim); margin-top: 2px;
+    }
 
     /* ═══════════════════════════════════════════════════════════════
        ROUTINES
     ═══════════════════════════════════════════════════════════════ */
     .routine-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
     }
     .routine-card {
       background: var(--surface);
       border: 2px solid var(--border);
       border-radius: var(--radius);
-      padding: 14px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.2s;
+      padding: 12px; text-align: center;
+      cursor: pointer; transition: all 0.2s;
+      position: relative;
     }
     .routine-card.done {
       border-color: var(--green);
-      background: rgba(45, 212, 160, 0.08);
+      background: rgba(0, 255, 136, 0.05);
     }
-    .routine-card .r-emoji { font-size: 28px; margin-bottom: 6px; }
-    .routine-card .r-title { font-size: 12px; color: var(--text-muted); }
+    .routine-card .r-emoji { font-size: 24px; margin-bottom: 4px; }
+    .routine-card .r-title { font-size: 11px; color: var(--text-muted); }
     .routine-card.done .r-title { color: var(--green); }
-    .routine-card .r-check {
-      font-size: 11px;
-      margin-top: 6px;
-      color: var(--text-muted);
-    }
+    .routine-card .r-check { font-size: 10px; margin-top: 4px; color: var(--text-dim); }
     .routine-card.done .r-check { color: var(--green); }
+    .routine-card .r-time { font-size: 9px; color: var(--accent); margin-top: 2px; }
+    .routine-card .r-delete {
+      position: absolute; top: 4px; right: 4px;
+      background: transparent; color: var(--text-dim);
+      font-size: 12px; padding: 2px 4px; border-radius: 3px;
+      opacity: 0; transition: opacity 0.2s;
+    }
+    .routine-card:hover .r-delete { opacity: 1; }
+
+    /* ═══════════════════════════════════════════════════════════════
+       AI CHAT
+    ═══════════════════════════════════════════════════════════════ */
+    .chat-messages {
+      max-height: 50vh; overflow-y: auto;
+      padding: 8px 0; margin-bottom: 8px;
+    }
+    .chat-msg {
+      padding: 8px 10px; margin-bottom: 6px;
+      border-radius: var(--radius-sm);
+      font-size: 13px; line-height: 1.5;
+      max-width: 85%;
+    }
+    .chat-msg.user {
+      background: var(--accent-soft);
+      margin-left: auto; border: 1px solid rgba(255, 107, 0, 0.2);
+    }
+    .chat-msg.assistant {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+    }
+    .chat-msg .msg-role {
+      font-size: 9px; color: var(--text-dim);
+      text-transform: uppercase; margin-bottom: 3px;
+      letter-spacing: 1px;
+    }
+    .chat-typing {
+      color: var(--accent); font-size: 12px;
+      padding: 8px; display: none;
+    }
 
     /* ═══════════════════════════════════════════════════════════════
        GAMES
     ═══════════════════════════════════════════════════════════════ */
     .game-select {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 16px;
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px;
+      margin-bottom: 12px;
     }
     .game-option {
       background: var(--surface);
       border: 2px solid var(--border);
       border-radius: var(--radius);
-      padding: 16px;
-      text-align: center;
-      cursor: pointer;
-      transition: border-color 0.2s;
+      padding: 12px; text-align: center;
+      cursor: pointer; transition: border-color 0.2s;
     }
     .game-option.active { border-color: var(--accent); }
-    .game-option .g-icon { font-size: 30px; margin-bottom: 6px; }
-    .game-option .g-name { font-size: 12px; color: var(--text-muted); }
+    .game-option .g-icon { font-size: 24px; margin-bottom: 4px; }
+    .game-option .g-name { font-size: 10px; color: var(--text-muted); }
 
-    /* Tap Battle game area */
-    #tap-arena {
-      display: none;
-      text-align: center;
-    }
+    #tap-arena { display: none; text-align: center; }
     #tap-arena.active { display: block; }
     .tap-timer {
-      font-size: 48px;
-      font-weight: 900;
-      color: var(--accent);
-      line-height: 1;
-      margin: 20px 0 10px;
+      font-size: 42px; font-weight: 900;
+      color: var(--accent); line-height: 1; margin: 16px 0 8px;
     }
-    .tap-score {
-      font-size: 24px;
-      color: var(--text-muted);
-      margin-bottom: 24px;
-    }
+    .tap-score { font-size: 20px; color: var(--text-muted); margin-bottom: 16px; }
     #tap-btn {
-      width: 160px; height: 160px;
+      width: 140px; height: 140px;
       border-radius: 50%;
       background: var(--accent);
-      box-shadow: 0 0 40px rgba(108, 99, 255, 0.4);
-      font-size: 32px;
+      box-shadow: 0 0 30px var(--accent-glow);
+      font-size: 28px;
       display: flex; align-items: center; justify-content: center;
-      margin: 0 auto;
-      transition: transform 0.08s;
-      color: #fff;
+      margin: 0 auto; transition: transform 0.08s; color: #000;
     }
     #tap-btn:active { transform: scale(0.92); }
 
-    /* Reaction game */
     #reaction-arena { display: none; text-align: center; }
     #reaction-arena.active { display: block; }
     .reaction-target {
-      width: 120px; height: 120px;
-      border-radius: 50%;
-      background: var(--surface-2);
-      margin: 30px auto;
-      transition: background 0.1s;
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 36px;
+      width: 100px; height: 100px;
+      border-radius: 50%; background: var(--surface-2);
+      margin: 20px auto; transition: background 0.1s;
+      cursor: pointer; display: flex;
+      align-items: center; justify-content: center; font-size: 30px;
     }
     .reaction-target.go { background: var(--green); }
     .reaction-target.wait { background: var(--red); }
 
-    /* Memory game */
     #memory-arena { display: none; }
     #memory-arena.active { display: block; }
     .memory-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-      margin: 16px 0;
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 6px; margin: 12px 0;
     }
     .mem-card {
       aspect-ratio: 1;
@@ -436,52 +440,38 @@
       background: var(--surface-2);
       border: 2px solid var(--border);
       display: flex; align-items: center; justify-content: center;
-      font-size: 22px;
-      cursor: pointer;
-      transition: all 0.3s;
-      user-select: none;
+      font-size: 20px; cursor: pointer;
+      transition: all 0.3s; user-select: none;
     }
     .mem-card.flipped { background: var(--accent-soft); border-color: var(--accent); }
-    .mem-card.matched { background: rgba(45, 212, 160, 0.15); border-color: var(--green); }
+    .mem-card.matched { background: rgba(0, 255, 136, 0.1); border-color: var(--green); }
     .mem-card .mem-face { display: none; }
     .mem-card.flipped .mem-face, .mem-card.matched .mem-face { display: block; }
 
     /* ═══════════════════════════════════════════════════════════════
-       LEADERBOARD (پنل رقابتی)
+       LEADERBOARD
     ═══════════════════════════════════════════════════════════════ */
     .leaderboard-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px;
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px;
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
-    .lb-rank {
-      font-size: 18px;
-      font-weight: 900;
-      color: var(--text-muted);
-      width: 28px;
-      text-align: center;
-    }
+    .lb-rank { font-size: 16px; font-weight: 900; color: var(--text-dim); width: 24px; text-align: center; }
     .lb-rank.gold { color: var(--yellow); }
-    .lb-name { flex: 1; font-size: 15px; }
-    .lb-points {
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--accent);
-    }
+    .lb-name { flex: 1; font-size: 14px; }
+    .lb-points { font-size: 14px; font-weight: 700; color: var(--accent); }
 
     /* ═══════════════════════════════════════════════════════════════
-       VIBE PICKER (modal)
+       MODAL (Vibe Picker)
     ═══════════════════════════════════════════════════════════════ */
     .modal-overlay {
       position: fixed; inset: 0;
-      background: rgba(0,0,0,0.6);
-      z-index: 50;
-      display: flex; align-items: flex-end;
+      background: rgba(0,0,0,0.7);
+      z-index: 50; display: flex;
+      align-items: flex-end;
       opacity: 0; pointer-events: none;
       transition: opacity 0.25s;
     }
@@ -489,29 +479,16 @@
     .modal-sheet {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius) var(--radius) 0 0;
-      padding: 20px 16px 32px;
-      width: 100%;
-      transform: translateY(100%);
-      transition: transform 0.3s ease;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      padding: 16px 14px 28px; width: 100%;
+      transform: translateY(100%); transition: transform 0.3s ease;
     }
     .modal-overlay.open .modal-sheet { transform: translateY(0); }
-    .modal-handle {
-      width: 36px; height: 4px;
-      background: var(--border);
-      border-radius: 2px;
-      margin: 0 auto 16px;
-    }
-    .modal-title {
-      font-size: 16px;
-      font-weight: 700;
-      margin-bottom: 16px;
-    }
+    .modal-handle { width: 32px; height: 3px; background: var(--border); border-radius: 2px; margin: 0 auto 14px; }
+    .modal-title { font-size: 14px; font-weight: 700; margin-bottom: 14px; }
     .vibe-grid {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 8px;
-      margin-bottom: 16px;
+      display: grid; grid-template-columns: repeat(5, 1fr);
+      gap: 6px; margin-bottom: 14px;
     }
     .vibe-option {
       aspect-ratio: 1;
@@ -520,30 +497,26 @@
       border: 2px solid var(--border);
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
-      cursor: pointer;
-      font-size: 22px;
-      gap: 3px;
+      cursor: pointer; font-size: 18px; gap: 2px;
       transition: border-color 0.2s;
     }
-    .vibe-option:hover, .vibe-option.selected { border-color: var(--accent); background: var(--accent-soft); }
-    .vibe-option span { font-size: 9px; color: var(--text-muted); }
+    .vibe-option:hover, .vibe-option.selected {
+      border-color: var(--accent); background: var(--accent-soft);
+    }
+    .vibe-option span { font-size: 8px; color: var(--text-muted); }
 
     /* ═══════════════════════════════════════════════════════════════
-       TOAST / SNACKBAR
+       TOAST
     ═══════════════════════════════════════════════════════════════ */
     #toast {
-      position: fixed;
-      bottom: 90px;
+      position: fixed; bottom: 80px;
       left: 50%; transform: translateX(-50%) translateY(20px);
       background: var(--surface-2);
       border: 1px solid var(--border);
       border-radius: 20px;
-      padding: 8px 16px;
-      font-size: 13px;
-      white-space: nowrap;
-      z-index: 100;
-      opacity: 0;
-      transition: opacity 0.25s, transform 0.25s;
+      padding: 7px 14px; font-size: 12px;
+      white-space: nowrap; z-index: 100;
+      opacity: 0; transition: opacity 0.25s, transform 0.25s;
       pointer-events: none;
     }
     #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -552,86 +525,158 @@
        EMPTY STATE
     ═══════════════════════════════════════════════════════════════ */
     .empty-state {
-      text-align: center;
-      padding: 40px 20px;
-      color: var(--text-muted);
+      text-align: center; padding: 30px 16px; color: var(--text-dim);
     }
-    .empty-state .icon { font-size: 40px; margin-bottom: 10px; }
-    .empty-state p { font-size: 14px; }
+    .empty-state .icon { font-size: 32px; margin-bottom: 8px; }
+    .empty-state p { font-size: 12px; }
+
+    /* ═══════════════════════════════════════════════════════════════
+       MEDIA UPLOAD
+    ═══════════════════════════════════════════════════════════════ */
+    .media-upload-area {
+      display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap;
+    }
+    .media-upload-btn {
+      display: flex; align-items: center; gap: 4px;
+      background: var(--surface-2);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius-sm);
+      padding: 6px 10px; font-size: 11px;
+      color: var(--text-muted); cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .media-upload-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .media-upload-btn .upload-icon { font-size: 14px; }
+    .media-preview {
+      margin-top: 6px; position: relative;
+      display: inline-block;
+    }
+    .media-preview img, .media-preview video {
+      max-width: 120px; max-height: 120px;
+      border-radius: var(--radius-sm);
+      object-fit: cover;
+    }
+    .media-preview .remove-media {
+      position: absolute; top: 2px; right: 2px;
+      background: var(--red); color: #fff;
+      border-radius: 50%; width: 18px; height: 18px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; cursor: pointer;
+    }
+    .media-file-name {
+      font-size: 11px; color: var(--text-muted);
+      background: var(--surface-2);
+      padding: 4px 8px; border-radius: var(--radius-sm);
+      margin-top: 4px; display: inline-block;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       SCHEDULE INPUTS
+    ═══════════════════════════════════════════════════════════════ */
+    .schedule-row {
+      display: flex; gap: 6px; margin-bottom: 8px; align-items: center;
+    }
+    .schedule-row label {
+      font-size: 10px; color: var(--text-dim);
+      text-transform: uppercase; letter-spacing: 0.5px;
+      min-width: 32px;
+    }
+    .schedule-row input[type="date"],
+    .schedule-row input[type="time"] {
+      flex: 1; background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 6px 8px; font-size: 12px; color: var(--text);
+    }
+    .schedule-row input[type="date"]:focus,
+    .schedule-row input[type="time"]:focus {
+      border-color: var(--accent);
+    }
+    .call-toggle {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 11px; color: var(--text-muted);
+      cursor: pointer; margin-bottom: 8px;
+    }
+    .call-toggle input[type="checkbox"] {
+      accent-color: var(--accent);
+    }
 
     /* ═══════════════════════════════════════════════════════════════
        ANIMATIONS
     ═══════════════════════════════════════════════════════════════ */
     @keyframes slideUp {
-      from { opacity: 0; transform: translateY(12px); }
+      from { opacity: 0; transform: translateY(10px); }
       to   { opacity: 1; transform: translateY(0); }
     }
-    .anim-in { animation: slideUp 0.25s ease forwards; }
+    .anim-in { animation: slideUp 0.2s ease forwards; }
 
     @keyframes pop {
       0%   { transform: scale(1); }
-      50%  { transform: scale(1.15); }
+      50%  { transform: scale(1.1); }
       100% { transform: scale(1); }
     }
     .pop { animation: pop 0.2s ease; }
+
+    @keyframes glow {
+      0%, 100% { box-shadow: 0 0 5px var(--accent-glow); }
+      50%      { box-shadow: 0 0 20px var(--accent-glow); }
+    }
   </style>
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════════ LOADING -->
+<!-- ═══════════════════════════════════ LOADING -->
 <div id="loading">
   <div class="loader-ring"></div>
-  <p class="loader-text">در حال اتصال...</p>
+  <p class="loader-text">Connecting...</p>
 </div>
 
-<!-- ═══════════════════════════════════════════ HEADER -->
+<!-- ═══════════════════════════════════ HEADER -->
 <div id="header" style="display:none">
   <div class="header-vibes">
-    <!-- وایب خودم -->
     <div class="vibe-pill" id="my-vibe-pill" onclick="openVibePicker()">
       <span class="emoji" id="my-vibe-emoji">✨</span>
-      <span class="label" id="my-vibe-label">وایب من</span>
+      <span class="label" id="my-vibe-label">My vibe</span>
     </div>
-
-    <span class="header-sep">⟷</span>
-
-    <!-- وایب طرف مقابل -->
+    <span class="header-sep">|</span>
     <div class="partner-vibe" id="partner-vibe-display">
-      <span class="emoji" id="partner-emoji">❓</span>
-      <span id="partner-name">طرف مقابل</span>
+      <span class="emoji" id="partner-emoji">?</span>
+      <span id="partner-name">Partner</span>
+      <span id="partner-status-dot" class="offline-dot"></span>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════ SCREENS -->
+<!-- ═══════════════════════════════════ SCREENS -->
 
-<!-- ── روتین‌ها ── -->
+<!-- Routines -->
 <div id="screen-routine" class="screen active">
   <div class="card">
-    <div class="card-title">روتین‌های امروز</div>
+    <div class="card-title">Today's Routines</div>
     <div class="routine-grid" id="routine-grid">
       <div class="empty-state" style="grid-column:span 2">
-        <div class="icon">📋</div>
-        <p>روتین‌ای ثبت نشده</p>
+        <div class="icon">📋</div><p>No routines yet</p>
       </div>
     </div>
   </div>
-
   <div class="card">
-    <div class="card-title">روتین جدید</div>
+    <div class="card-title">New Routine</div>
     <div class="input-group">
-      <input class="input-field" id="routine-emoji-input" placeholder="⚡" style="max-width:50px; text-align:center;" maxlength="2" />
-      <input class="input-field" id="routine-title-input" placeholder="مثلاً: آب خوردن صبح" />
+      <input class="input-field" id="routine-emoji-input" placeholder="⚡" style="max-width:42px;text-align:center;" maxlength="2" />
+      <input class="input-field" id="routine-title-input" placeholder="e.g. Morning workout" />
       <button class="btn" onclick="addRoutine()">+</button>
+    </div>
+    <div class="schedule-row">
+      <label>Time</label>
+      <input type="time" id="routine-time-input" />
     </div>
   </div>
 </div>
 
-<!-- ── دیلی نوت ── -->
+<!-- Notes -->
 <div id="screen-notes" class="screen">
   <div class="card">
-    <div class="card-title">نوت جدید</div>
-    <!-- انتخاب وضعیت احساسی -->
+    <div class="card-title">New Note</div>
     <div class="mood-tags" id="mood-tags">
       <span class="mood-tag" data-emoji="💭" onclick="selectMood(this)">💭</span>
       <span class="mood-tag" data-emoji="🔥" onclick="selectMood(this)">🔥</span>
@@ -642,153 +687,167 @@
       <span class="mood-tag" data-emoji="💡" onclick="selectMood(this)">💡</span>
       <span class="mood-tag" data-emoji="🌙" onclick="selectMood(this)">🌙</span>
     </div>
+    <div class="media-upload-area">
+      <label class="media-upload-btn" for="note-media-input">
+        <span class="upload-icon">📷</span> Photo
+      </label>
+      <label class="media-upload-btn" for="note-media-input">
+        <span class="upload-icon">🎬</span> Video
+      </label>
+      <label class="media-upload-btn" for="note-audio-input">
+        <span class="upload-icon">🎵</span> Audio
+      </label>
+      <input type="file" id="note-media-input" accept="image/*,video/*,.gif" style="display:none" onchange="handleMediaSelect(this)" />
+      <input type="file" id="note-audio-input" accept="audio/*" style="display:none" onchange="handleAudioSelect(this)" />
+    </div>
+    <div id="media-preview-area"></div>
     <div class="input-group">
-      <input class="input-field" id="note-input" placeholder="چی تو ذهنته؟" />
-      <button class="btn" onclick="addNote()">ثبت</button>
+      <input class="input-field" id="note-input" placeholder="What's on your mind?" />
+      <button class="btn" onclick="addNote()">Send</button>
     </div>
   </div>
-
-  <div id="notes-list">
-    <!-- نوت‌ها اینجا رندر میشن -->
-  </div>
+  <div id="notes-list"></div>
 </div>
 
-<!-- ── To-Do ── -->
+<!-- To-Do -->
 <div id="screen-todo" class="screen">
-  <!-- تب داخلی: مشترک / شخصی -->
-  <div style="display:flex; gap:8px; margin-bottom:12px;">
-    <button class="btn btn-sm" id="todo-tab-shared" onclick="switchTodoTab('shared')" style="flex:1">مشترک 🤝</button>
-    <button class="btn btn-sm btn-ghost" id="todo-tab-mine" onclick="switchTodoTab('mine')" style="flex:1">شخصی 🔒</button>
+  <div style="display:flex;gap:6px;margin-bottom:10px;">
+    <button class="btn btn-sm" id="todo-tab-shared" onclick="switchTodoTab('shared')" style="flex:1">Shared 🤝</button>
+    <button class="btn btn-sm btn-ghost" id="todo-tab-mine" onclick="switchTodoTab('mine')" style="flex:1">Private 🔒</button>
   </div>
-
   <div class="card">
     <div class="input-group">
-      <input class="input-field" id="todo-emoji-input" placeholder="📌" style="max-width:50px; text-align:center;" maxlength="2" />
-      <input class="input-field" id="todo-input" placeholder="کاری که باید انجام بشه..." />
+      <input class="input-field" id="todo-emoji-input" placeholder="📌" style="max-width:42px;text-align:center;" maxlength="2" />
+      <input class="input-field" id="todo-input" placeholder="What needs to be done?" />
       <button class="btn" onclick="addTodo()">+</button>
     </div>
-    <!-- اولویت -->
-    <div style="display:flex; gap:6px; margin-bottom:10px;">
-      <button class="btn btn-sm btn-ghost" id="prio-1" onclick="setPriority(1)" style="flex:1">عادی</button>
-      <button class="btn btn-sm btn-ghost" id="prio-2" onclick="setPriority(2)" style="flex:1">متوسط</button>
-      <button class="btn btn-sm" id="prio-3" onclick="setPriority(3)" style="flex:1; background: var(--red);">🔥 مهم</button>
+    <div style="display:flex;gap:4px;margin-bottom:8px;">
+      <button class="btn btn-sm btn-ghost" id="prio-1" onclick="setPriority(1)" style="flex:1">Low</button>
+      <button class="btn btn-sm btn-ghost" id="prio-2" onclick="setPriority(2)" style="flex:1">Med</button>
+      <button class="btn btn-sm" id="prio-3" onclick="setPriority(3)" style="flex:1;background:var(--red);color:#fff;">🔥 High</button>
     </div>
+    <div class="schedule-row">
+      <label>Date</label>
+      <input type="date" id="todo-date-input" />
+    </div>
+    <div class="schedule-row">
+      <label>Time</label>
+      <input type="time" id="todo-time-input" />
+    </div>
+    <label class="call-toggle">
+      <input type="checkbox" id="todo-call-toggle" /> 📞 This is a call/meeting (1-day reminder)
+    </label>
   </div>
+  <div id="todo-list"></div>
+</div>
 
-  <div id="todo-list">
-    <!-- آیتم‌ها اینجا رندر میشن -->
+<!-- AI Chat -->
+<div id="screen-ai" class="screen">
+  <div class="card">
+    <div class="card-title">AI Assistant</div>
+    <div class="chat-messages" id="chat-messages">
+      <div class="chat-msg assistant">
+        <div class="msg-role">Assistant</div>
+        Hey! I'm your AI assistant. Ask me about fitness, productivity, routines, or anything else. I'm here to help!
+      </div>
+    </div>
+    <div class="chat-typing" id="chat-typing">Thinking...</div>
+    <div class="input-group" style="margin-bottom:0">
+      <input class="input-field" id="ai-input" placeholder="Ask me anything..." onkeypress="if(event.key==='Enter')sendAiMessage()" />
+      <button class="btn" onclick="sendAiMessage()">Ask</button>
+    </div>
   </div>
 </div>
 
-<!-- ── بازی ── -->
+<!-- Games -->
 <div id="screen-game" class="screen">
   <div class="card">
-    <div class="card-title">انتخاب بازی</div>
+    <div class="card-title">Pick a Game</div>
     <div class="game-select">
       <div class="game-option active" id="game-opt-tap" onclick="selectGame('tap')">
-        <div class="g-icon">👆</div>
-        <div class="g-name">نبرد تپ</div>
+        <div class="g-icon">👆</div><div class="g-name">Tap</div>
       </div>
       <div class="game-option" id="game-opt-reaction" onclick="selectGame('reaction')">
-        <div class="g-icon">⚡</div>
-        <div class="g-name">تست واکنش</div>
+        <div class="g-icon">⚡</div><div class="g-name">Reaction</div>
       </div>
       <div class="game-option" id="game-opt-memory" onclick="selectGame('memory')">
-        <div class="g-icon">🧠</div>
-        <div class="g-name">حافظه</div>
+        <div class="g-icon">🧠</div><div class="g-name">Memory</div>
       </div>
     </div>
   </div>
-
-  <!-- بازی تپ -->
   <div id="tap-arena" class="anim-in">
     <div class="card" style="text-align:center;">
       <div class="tap-timer" id="tap-timer">5</div>
-      <div class="tap-score">تپ: <span id="tap-count">0</span></div>
+      <div class="tap-score">Taps: <span id="tap-count">0</span></div>
       <button id="tap-btn" onclick="handleTap()">🎯</button>
-      <p style="margin-top: 16px; color: var(--text-muted); font-size: 13px;" id="tap-status">
-        شروع کن!
-      </p>
+      <p style="margin-top:12px;color:var(--text-muted);font-size:12px;" id="tap-status">Start tapping!</p>
     </div>
   </div>
-
-  <!-- بازی واکنش -->
   <div id="reaction-arena">
     <div class="card" style="text-align:center;">
-      <p style="color:var(--text-muted); font-size:14px; margin-bottom:8px;">وقتی سبز شد بزن!</p>
+      <p style="color:var(--text-muted);font-size:13px;margin-bottom:6px;">Hit when it turns green!</p>
       <div class="reaction-target" id="reaction-target" onclick="handleReaction()">⏳</div>
-      <p id="reaction-result" style="font-size:20px; font-weight:700; min-height:32px;"></p>
-      <button class="btn" onclick="startReaction()" style="margin-top:8px;">شروع</button>
+      <p id="reaction-result" style="font-size:18px;font-weight:700;min-height:28px;"></p>
+      <button class="btn" onclick="startReaction()" style="margin-top:6px;">Start</button>
     </div>
   </div>
-
-  <!-- بازی حافظه -->
   <div id="memory-arena">
     <div class="card">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-        <span style="font-size:13px; color:var(--text-muted);">جفت‌های پیدا شده: <span id="mem-matches">0</span>/8</span>
-        <span style="font-size:13px; color:var(--text-muted);">اشتباه: <span id="mem-errors">0</span></span>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <span style="font-size:12px;color:var(--text-muted);">Matches: <span id="mem-matches">0</span>/8</span>
+        <span style="font-size:12px;color:var(--text-muted);">Errors: <span id="mem-errors">0</span></span>
       </div>
       <div class="memory-grid" id="memory-grid"></div>
-      <button class="btn" onclick="startMemory()" style="width:100%;">شروع جدید</button>
+      <button class="btn" onclick="startMemory()" style="width:100%;">New Game</button>
     </div>
   </div>
 </div>
 
-<!-- ── رقابت ── -->
+<!-- Leaderboard -->
 <div id="screen-panel" class="screen">
   <div class="card">
-    <div class="card-title">لیدربورد</div>
-    <div id="leaderboard-list">
-      <!-- رتبه‌بندی اینجا رندر میشه -->
-    </div>
+    <div class="card-title">Leaderboard</div>
+    <div id="leaderboard-list"></div>
   </div>
-
   <div class="card">
-    <div class="card-title">آخرین امتیازها</div>
-    <div id="recent-scores" style="color:var(--text-muted); font-size:13px;">
-      در حال لود...
-    </div>
+    <div class="card-title">Best Scores</div>
+    <div id="recent-scores" style="color:var(--text-muted);font-size:12px;">Loading...</div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════ TAB BAR -->
+<!-- ═══════════════════════════════════ TAB BAR -->
 <div id="tab-bar" style="display:none">
   <button class="tab-btn active" data-tab="routine" onclick="switchTab('routine')">
-    <span class="tab-icon">⚡</span>
-    <span>روتین</span>
+    <span class="tab-icon">⚡</span><span>Routine</span>
   </button>
   <button class="tab-btn" data-tab="notes" onclick="switchTab('notes')">
-    <span class="tab-icon">📝</span>
-    <span>نوت</span>
+    <span class="tab-icon">📝</span><span>Notes</span>
   </button>
   <button class="tab-btn" data-tab="todo" onclick="switchTab('todo')">
-    <span class="tab-icon">✅</span>
-    <span>کارها</span>
+    <span class="tab-icon">✅</span><span>Tasks</span>
+  </button>
+  <button class="tab-btn" data-tab="ai" onclick="switchTab('ai')">
+    <span class="tab-icon">🤖</span><span>AI</span>
   </button>
   <button class="tab-btn" data-tab="game" onclick="switchTab('game')">
-    <span class="tab-icon">🎮</span>
-    <span>بازی</span>
+    <span class="tab-icon">🎮</span><span>Games</span>
   </button>
   <button class="tab-btn" data-tab="panel" onclick="switchTab('panel')">
-    <span class="tab-icon">🏆</span>
-    <span>رقابت</span>
+    <span class="tab-icon">🏆</span><span>Rank</span>
   </button>
 </div>
 
-<!-- ═══════════════════════════════════════════ VIBE PICKER MODAL -->
+<!-- ═══════════════════════════════════ VIBE PICKER MODAL -->
 <div class="modal-overlay" id="vibe-modal" onclick="closeVibeModal(event)">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
-    <div class="modal-title">وایب امروزت چیه؟</div>
-    <div class="vibe-grid" id="vibe-grid">
-      <!-- گزینه‌ها از JS رندر میشن -->
-    </div>
-    <button class="btn" style="width:100%" onclick="saveVibe()">ثبت وایب</button>
+    <div class="modal-title">What's your vibe today?</div>
+    <div class="vibe-grid" id="vibe-grid"></div>
+    <button class="btn" style="width:100%" onclick="saveVibe()">Set Vibe</button>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════ TOAST -->
+<!-- ═══════════════════════════════════ TOAST -->
 <div id="toast"></div>
 
 <script>
@@ -796,107 +855,71 @@
 // CONFIG & STATE
 // ═══════════════════════════════════════════════════════════════════
 
-/**
- * آدرس سرور Django.
- * در production اینجا URL render.com رو میذارید.
- * در development "" که یعنی همون host.
- */
 const API_BASE = "";
-
-/**
- * اطلاعات کاربر از Telegram WebApp SDK.
- * اگه خارج از تلگرام باز بشه (برای تست) یه fallback داریم.
- */
 const tgWebApp = window.Telegram?.WebApp;
 const tgUser = tgWebApp?.initDataUnsafe?.user || {
   id: 999999999,
-  first_name: "تست",
+  first_name: "Test",
   username: "test_user"
 };
 
-// State اپ - همه داده‌ها اینجا نگه داشته میشن
+// Selected media file for note upload
+let selectedMediaFile = null;
+let selectedMediaType = "none";
+
 const state = {
-  user: null,       // اطلاعات من از API
-  partner: null,    // اطلاعات طرف مقابل از API
+  user: null,
+  partner: null,
   notes: [],
   sharedTodos: [],
   myTodos: [],
   routines: [],
   leaderboard: [],
-  selectedMood: "",         // ایموجی انتخاب شده برای نوت
-  selectedVibe: null,       // وایب انتخاب شده (برای modal)
-  currentTodoTab: "shared", // تب فعال To-Do
-  currentGame: "tap",       // بازی انتخاب شده
-  todoPriority: 1,          // اولویت پیش‌فرض To-Do
+  selectedMood: "",
+  selectedVibe: null,
+  currentTodoTab: "shared",
+  currentGame: "tap",
+  todoPriority: 1,
 };
 
-// تنظیمات بازی تپ
-const tapGame = {
-  active: false,
-  count: 0,
-  timer: null,
-  timeLeft: 5,
-};
+const tapGame = { active: false, count: 0, timer: null, timeLeft: 5 };
+const reactionGame = { active: false, startTime: null, timer: null, waiting: false };
+const memGame = { cards: [], flipped: [], matches: 0, errors: 0, locked: false };
 
-// بازی واکنش
-const reactionGame = {
-  active: false,
-  startTime: null,
-  timer: null,
-  waiting: false,
-};
-
-// بازی حافظه
-const memGame = {
-  cards: [],
-  flipped: [],
-  matches: 0,
-  errors: 0,
-  locked: false,
-};
-
-// وایب‌های موجود برای انتخاب
 const VIBES = [
-  { emoji: "🔥", label: "داغ" },
-  { emoji: "😴", label: "خواب‌آلود" },
-  { emoji: "💪", label: "انرژی" },
-  { emoji: "🎯", label: "فوکوس" },
-  { emoji: "🌊", label: "آروم" },
-  { emoji: "⚡", label: "الکتریک" },
-  { emoji: "🌙", label: "شبانه" },
-  { emoji: "☕", label: "قهوه‌ای" },
-  { emoji: "😤", label: "مصمم" },
-  { emoji: "🌈", label: "خوشحال" },
-  { emoji: "🧊", label: "سرد" },
-  { emoji: "💭", label: "فکری" },
-  { emoji: "🎵", label: "موزیکال" },
-  { emoji: "🌸", label: "ملایم" },
-  { emoji: "🚀", label: "رکت" },
+  { emoji: "🔥", label: "On Fire" },
+  { emoji: "😴", label: "Sleepy" },
+  { emoji: "💪", label: "Power" },
+  { emoji: "🎯", label: "Focus" },
+  { emoji: "🌊", label: "Chill" },
+  { emoji: "⚡", label: "Electric" },
+  { emoji: "🌙", label: "Night" },
+  { emoji: "☕", label: "Coffee" },
+  { emoji: "😤", label: "Fierce" },
+  { emoji: "🌈", label: "Happy" },
+  { emoji: "🧊", label: "Ice" },
+  { emoji: "💭", label: "Thinking" },
+  { emoji: "🎵", label: "Musical" },
+  { emoji: "🌸", label: "Soft" },
+  { emoji: "🚀", label: "Launch" },
 ];
 
 // ═══════════════════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════════════════
 
-/**
- * تابع اصلی که بعد از لود صفحه اجرا میشه.
- * ترتیب: تنظیم تلگرام → لود داده → رندر UI
- */
 async function init() {
-  // تلگرام رو آماده کن
   if (tgWebApp) {
     tgWebApp.ready();
-    tgWebApp.expand(); // صفحه رو fullscreen کن
+    tgWebApp.expand();
   }
 
-  // لود داده از سرور
   try {
     const data = await apiGet(
       `/api/dashboard/?tg_id=${tgUser.id}&name=${encodeURIComponent(tgUser.first_name)}&username=${tgUser.username || ""}`
     );
 
     if (data.ok) {
-      // ذخیره در state
       state.user = data.user;
       state.partner = data.partner;
       state.notes = data.notes;
@@ -905,7 +928,6 @@ async function init() {
       state.routines = data.routines;
       state.leaderboard = data.leaderboard;
 
-      // رندر اولیه
       renderHeader();
       renderRoutines();
       renderNotes();
@@ -913,41 +935,46 @@ async function init() {
       renderLeaderboard();
       buildVibePicker();
 
-      // نمایش UI
       document.getElementById("header").style.display = "flex";
       document.getElementById("tab-bar").style.display = "grid";
     } else {
-      showToast("❌ خطا در اتصال");
+      showToast("Connection error");
     }
   } catch (e) {
     console.error(e);
-    showToast("❌ اتصال به سرور برقرار نشد");
+    showToast("Server unreachable");
   }
 
-  // مخفی کردن loading
+  // Hide loading
   const loadEl = document.getElementById("loading");
   loadEl.classList.add("hidden");
   setTimeout(() => loadEl.remove(), 500);
+
+  // Track presence - notify when leaving
+  window.addEventListener("beforeunload", () => {
+    navigator.sendBeacon(
+      API_BASE + "/api/presence/offline/",
+      JSON.stringify({ tg_id: tgUser.id })
+    );
+  });
+
+  // Also send offline via fetch on visibility change
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      apiPost("/api/presence/offline/");
+    }
+  });
 }
 
 // ═══════════════════════════════════════════════════════════════════
 // API HELPERS
 // ═══════════════════════════════════════════════════════════════════
 
-/**
- * GET request به API.
- * @param {string} url - مسیر کامل endpoint
- */
 async function apiGet(url) {
   const res = await fetch(API_BASE + url);
   return res.json();
 }
 
-/**
- * POST request به API.
- * @param {string} url - مسیر endpoint
- * @param {object} body - داده‌ای که میفرستیم
- */
 async function apiPost(url, body = {}) {
   const res = await fetch(API_BASE + url, {
     method: "POST",
@@ -957,13 +984,15 @@ async function apiPost(url, body = {}) {
   return res.json();
 }
 
-/**
- * DELETE request به API.
- * @param {string} url
- */
 async function apiDelete(url) {
-  const res = await fetch(API_BASE + url + `?tg_id=${tgUser.id}`, {
-    method: "DELETE",
+  const res = await fetch(API_BASE + url + `?tg_id=${tgUser.id}`, { method: "DELETE" });
+  return res.json();
+}
+
+async function apiUpload(url, formData) {
+  const res = await fetch(API_BASE + url, {
+    method: "POST",
+    body: formData,
   });
   return res.json();
 }
@@ -974,15 +1003,16 @@ async function apiDelete(url) {
 
 function renderHeader() {
   if (!state.user) return;
-
   document.getElementById("my-vibe-emoji").textContent = state.user.vibe_emoji;
   document.getElementById("my-vibe-label").textContent = state.user.vibe_label;
 
   if (state.partner) {
     document.getElementById("partner-emoji").textContent = state.partner.vibe_emoji;
     document.getElementById("partner-name").textContent = state.partner.name;
+    const dot = document.getElementById("partner-status-dot");
+    dot.className = state.partner.is_online ? "online-dot" : "offline-dot";
   } else {
-    document.getElementById("partner-vibe-display").textContent = "هنوز وصل نشده";
+    document.getElementById("partner-vibe-display").textContent = "No partner yet";
   }
 }
 
@@ -991,15 +1021,10 @@ function renderHeader() {
 // ═══════════════════════════════════════════════════════════════════
 
 function switchTab(tabName) {
-  // غیرفعال کردن همه
   document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
   document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-
-  // فعال کردن انتخابی
   document.getElementById(`screen-${tabName}`).classList.add("active");
   document.querySelector(`[data-tab="${tabName}"]`).classList.add("active");
-
-  // اگه رفتیم پنل، لیدربورد رو reload کنیم
   if (tabName === "panel") loadLeaderboard();
 }
 
@@ -1009,19 +1034,18 @@ function switchTab(tabName) {
 
 function renderRoutines() {
   const grid = document.getElementById("routine-grid");
-
   if (!state.routines.length) {
     grid.innerHTML = `<div class="empty-state" style="grid-column:span 2">
-      <div class="icon">📋</div><p>روتین‌ای ثبت نشده</p></div>`;
+      <div class="icon">📋</div><p>No routines yet</p></div>`;
     return;
   }
-
   grid.innerHTML = state.routines.map(r => `
-    <div class="routine-card ${r.done_today ? "done" : ""}" id="routine-${r.id}"
-         onclick="checkRoutine(${r.id})">
-      <div class="r-emoji">${r.emoji}</div>
-      <div class="r-title">${r.title}</div>
-      <div class="r-check">${r.done_today ? "✓ انجام شد" : "○ انجام نشده"}</div>
+    <div class="routine-card ${r.done_today ? "done" : ""}" id="routine-${r.id}">
+      <button class="r-delete" onclick="event.stopPropagation();deleteRoutine(${r.id})">×</button>
+      <div class="r-emoji" onclick="checkRoutine(${r.id})">${r.emoji}</div>
+      <div class="r-title" onclick="checkRoutine(${r.id})">${escapeHtml(r.title)}</div>
+      ${r.scheduled_time ? `<div class="r-time">${r.scheduled_time}</div>` : ""}
+      <div class="r-check" onclick="checkRoutine(${r.id})">${r.done_today ? "✓ Done" : "○ Pending"}</div>
     </div>
   `).join("");
 }
@@ -1029,42 +1053,47 @@ function renderRoutines() {
 async function addRoutine() {
   const titleEl = document.getElementById("routine-title-input");
   const emojiEl = document.getElementById("routine-emoji-input");
+  const timeEl = document.getElementById("routine-time-input");
   const title = titleEl.value.trim();
   const emoji = emojiEl.value.trim() || "⚡";
+  const scheduledTime = timeEl.value || "";
 
-  if (!title) { showToast("عنوان روتین وارد کن"); return; }
+  if (!title) { showToast("Enter a routine title"); return; }
 
-  const res = await apiPost("/api/routines/add/", { title, emoji });
+  const res = await apiPost("/api/routines/add/", { title, emoji, scheduled_time: scheduledTime });
   if (res.ok) {
-    // اضافه کردن به state و رندر
     state.routines.push(res.routine);
     renderRoutines();
-    titleEl.value = "";
-    emojiEl.value = "";
-    showToast("✅ روتین اضافه شد");
+    titleEl.value = ""; emojiEl.value = ""; timeEl.value = "";
+    showToast("Routine added");
   }
 }
 
 async function checkRoutine(id) {
   const res = await apiPost(`/api/routines/${id}/check/`);
   if (res.ok) {
-    // آپدیت state
     const r = state.routines.find(x => x.id === id);
     if (r) r.done_today = res.done_today;
-
-    // انیمیشن روی کارت
     const card = document.getElementById(`routine-${id}`);
     card.classList.toggle("done", res.done_today);
-    card.querySelector(".r-check").textContent = res.done_today ? "✓ انجام شد" : "○ انجام نشده";
+    card.querySelector(".r-check").textContent = res.done_today ? "✓ Done" : "○ Pending";
     card.classList.add("pop");
     setTimeout(() => card.classList.remove("pop"), 300);
+    showToast(res.done_today ? "Routine done!" : "Undone");
+  }
+}
 
-    showToast(res.done_today ? "✅ روتین انجام شد!" : "↩️ undo شد");
+async function deleteRoutine(id) {
+  const res = await apiDelete(`/api/routines/${id}/`);
+  if (res.ok) {
+    state.routines = state.routines.filter(r => r.id !== id);
+    renderRoutines();
+    showToast("Routine deleted");
   }
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// DAILY NOTES
+// DAILY NOTES (with media)
 // ═══════════════════════════════════════════════════════════════════
 
 function selectMood(el) {
@@ -1073,27 +1102,81 @@ function selectMood(el) {
   state.selectedMood = el.dataset.emoji;
 }
 
+function handleMediaSelect(input) {
+  if (input.files && input.files[0]) {
+    const file = input.files[0];
+    selectedMediaFile = file;
+    if (file.type.startsWith("image/")) selectedMediaType = "image";
+    else if (file.type.startsWith("video/")) selectedMediaType = "video";
+    else selectedMediaType = "gif";
+    showMediaPreview(file);
+  }
+}
+
+function handleAudioSelect(input) {
+  if (input.files && input.files[0]) {
+    selectedMediaFile = input.files[0];
+    selectedMediaType = "audio";
+    showMediaPreview(input.files[0]);
+  }
+}
+
+function showMediaPreview(file) {
+  const area = document.getElementById("media-preview-area");
+  const url = URL.createObjectURL(file);
+
+  if (file.type.startsWith("image/")) {
+    area.innerHTML = `
+      <div class="media-preview">
+        <img src="${url}" alt="preview" />
+        <button class="remove-media" onclick="clearMedia()">×</button>
+      </div>`;
+  } else if (file.type.startsWith("video/")) {
+    area.innerHTML = `
+      <div class="media-preview">
+        <video src="${url}" autoplay muted style="max-width:120px;max-height:120px;border-radius:var(--radius-sm);"></video>
+        <button class="remove-media" onclick="clearMedia()">×</button>
+      </div>
+      <div class="media-file-name">${escapeHtml(file.name)}</div>`;
+  } else if (file.type.startsWith("audio/")) {
+    area.innerHTML = `
+      <div class="media-file-name">🎵 ${escapeHtml(file.name)}</div>
+      <button class="remove-media" style="position:static;display:inline-block;margin-left:8px;border-radius:var(--radius-sm);" onclick="clearMedia()">×</button>`;
+  }
+}
+
+function clearMedia() {
+  selectedMediaFile = null;
+  selectedMediaType = "none";
+  document.getElementById("media-preview-area").innerHTML = "";
+  document.getElementById("note-media-input").value = "";
+  document.getElementById("note-audio-input").value = "";
+}
+
 function renderNotes() {
   const list = document.getElementById("notes-list");
-
   if (!state.notes.length) {
-    list.innerHTML = `<div class="empty-state"><div class="icon">📝</div><p>اولین نوت رو بنویس!</p></div>`;
+    list.innerHTML = `<div class="empty-state"><div class="icon">📝</div><p>Write your first note!</p></div>`;
     return;
   }
 
   list.innerHTML = state.notes.map(n => `
-    <div class="card anim-in">
+    <div class="card anim-in" style="padding:10px;">
       <div class="note-item">
         <div class="note-avatar">${n.mood_tag || "💬"}</div>
         <div class="note-body">
           <div class="note-meta">
-            <strong>${n.author_name}</strong>
+            <strong>${escapeHtml(n.author_name)}</strong>
             <span>${n.created_at}</span>
-            ${n.is_pinned ? '<span class="note-pin-badge">📌 پین</span>' : ""}
           </div>
-          <div class="note-text ${n.is_mine ? "note-mine" : ""}">${escapeHtml(n.text)}</div>
+          ${n.text ? `<div class="note-text ${n.is_mine ? "note-mine" : ""}">${escapeHtml(n.text)}</div>` : ""}
+          ${n.media_type === "image" ? `<img class="note-media" src="${n.media_url}" alt="photo" onclick="window.open('${n.media_url}','_blank')" />` : ""}
+          ${n.media_type === "video" ? `<video class="note-media" src="${n.media_url}" controls preload="metadata"></video>` : ""}
+          ${n.media_type === "audio" ? `<audio class="note-media-audio" src="${n.media_url}" controls></audio>` : ""}
+          ${n.media_type === "gif" ? `<img class="note-media" src="${n.media_url}" alt="gif" onclick="window.open('${n.media_url}','_blank')" />` : ""}
+          ${n.media_type === "sticker" ? `<img class="note-media" src="${n.media_url}" alt="sticker" style="max-height:160px;" onclick="window.open('${n.media_url}','_blank')" />` : ""}
         </div>
-        ${n.is_mine ? `<button class="btn btn-ghost btn-sm" onclick="deleteNote(${n.id}, this)" style="align-self:flex-start">×</button>` : ""}
+        ${n.is_mine ? `<button class="btn btn-ghost btn-sm" onclick="deleteNote(${n.id}, this)" style="align-self:flex-start;color:var(--red);">×</button>` : ""}
       </div>
     </div>
   `).join("");
@@ -1102,30 +1185,58 @@ function renderNotes() {
 async function addNote() {
   const input = document.getElementById("note-input");
   const text = input.value.trim();
-  if (!text) { showToast("متن نوت رو بنویس"); return; }
 
-  const res = await apiPost("/api/notes/add/", {
-    text,
-    mood_tag: state.selectedMood,
-  });
+  if (!text && !selectedMediaFile) { showToast("Write something or attach media"); return; }
 
-  if (res.ok) {
-    // اضافه کردن به اول لیست (جدیدترین اول)
-    state.notes.unshift({
-      id: res.note.id,
-      text: res.note.text,
-      mood_tag: res.note.mood_tag,
-      author_name: tgUser.first_name,
-      author_id: tgUser.id,
-      is_mine: true,
-      is_pinned: false,
-      created_at: res.note.created_at,
+  if (selectedMediaFile) {
+    // Upload with FormData
+    const formData = new FormData();
+    formData.append("tg_id", tgUser.id);
+    formData.append("name", tgUser.first_name);
+    formData.append("text", text);
+    formData.append("mood_tag", state.selectedMood);
+    formData.append("media_type", selectedMediaType);
+    formData.append("media_file", selectedMediaFile);
+
+    const res = await apiUpload("/api/notes/add/", formData);
+    if (res.ok) {
+      state.notes.unshift({
+        id: res.note.id, text: res.note.text,
+        mood_tag: res.note.mood_tag,
+        author_name: tgUser.first_name, author_id: tgUser.id,
+        is_mine: true, is_pinned: false,
+        media_type: res.note.media_type,
+        media_url: res.note.media_url,
+        media_thumbnail: res.note.media_thumbnail,
+        created_at: res.note.created_at,
+      });
+      renderNotes();
+      input.value = "";
+      state.selectedMood = "";
+      document.querySelectorAll(".mood-tag").forEach(t => t.classList.remove("selected"));
+      clearMedia();
+      showToast("Note sent");
+    }
+  } else {
+    // Text-only note
+    const res = await apiPost("/api/notes/add/", {
+      text, mood_tag: state.selectedMood,
     });
-    renderNotes();
-    input.value = "";
-    state.selectedMood = "";
-    document.querySelectorAll(".mood-tag").forEach(t => t.classList.remove("selected"));
-    showToast("✅ نوت ثبت شد");
+    if (res.ok) {
+      state.notes.unshift({
+        id: res.note.id, text: res.note.text,
+        mood_tag: res.note.mood_tag,
+        author_name: tgUser.first_name, author_id: tgUser.id,
+        is_mine: true, is_pinned: false,
+        media_type: "none", media_url: "", media_thumbnail: "",
+        created_at: res.note.created_at,
+      });
+      renderNotes();
+      input.value = "";
+      state.selectedMood = "";
+      document.querySelectorAll(".mood-tag").forEach(t => t.classList.remove("selected"));
+      showToast("Note sent");
+    }
   }
 }
 
@@ -1135,10 +1246,8 @@ async function deleteNote(id, btn) {
   if (res.ok) {
     state.notes = state.notes.filter(n => n.id !== id);
     renderNotes();
-    showToast("🗑 نوت حذف شد");
-  } else {
-    btn.disabled = false;
-  }
+    showToast("Note deleted");
+  } else { btn.disabled = false; }
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -1149,14 +1258,8 @@ function switchTodoTab(tab) {
   state.currentTodoTab = tab;
   const shared = document.getElementById("todo-tab-shared");
   const mine = document.getElementById("todo-tab-mine");
-
-  if (tab === "shared") {
-    shared.classList.remove("btn-ghost");
-    mine.classList.add("btn-ghost");
-  } else {
-    mine.classList.remove("btn-ghost");
-    shared.classList.add("btn-ghost");
-  }
+  if (tab === "shared") { shared.classList.remove("btn-ghost"); mine.classList.add("btn-ghost"); }
+  else { mine.classList.remove("btn-ghost"); shared.classList.add("btn-ghost"); }
   renderTodos();
 }
 
@@ -1165,9 +1268,15 @@ function setPriority(p) {
   [1, 2, 3].forEach(i => {
     const btn = document.getElementById(`prio-${i}`);
     btn.classList.toggle("btn-ghost", i !== p);
-    if (i !== p && i !== 3) btn.style.background = "";
-    if (i === 3 && i === p) btn.style.background = "var(--red)";
+    if (i === 3) btn.style.background = i === p ? "var(--red)" : "";
   });
+}
+
+function formatSchedule(date, time) {
+  let parts = [];
+  if (date) parts.push(date);
+  if (time) parts.push(time);
+  return parts.length ? parts.join(" @ ") : "";
 }
 
 function renderTodos() {
@@ -1175,7 +1284,7 @@ function renderTodos() {
   const items = state.currentTodoTab === "shared" ? state.sharedTodos : state.myTodos;
 
   if (!items.length) {
-    list.innerHTML = `<div class="empty-state"><div class="icon">✅</div><p>کاری ثبت نشده</p></div>`;
+    list.innerHTML = `<div class="empty-state"><div class="icon">✅</div><p>No tasks yet</p></div>`;
     return;
   }
 
@@ -1184,11 +1293,13 @@ function renderTodos() {
       <div class="todo-checkbox ${t.is_done ? "checked" : ""}" onclick="toggleTodo(${t.id})"></div>
       <div class="todo-title ${t.is_done ? "done-text" : ""}">
         ${t.emoji ? t.emoji + " " : ""}${escapeHtml(t.title)}
-        ${state.currentTodoTab === "shared" && t.owner_name ? `<br><small style="color:var(--text-muted); font-size:11px;">${t.owner_name}</small>` : ""}
-        ${t.is_done && t.done_by ? `<br><small style="color:var(--green); font-size:11px;">✓ ${t.done_by}</small>` : ""}
+        ${(state.currentTodoTab === "shared" && t.owner_name) ? `<br><small style="color:var(--text-dim);font-size:10px;">${escapeHtml(t.owner_name)}</small>` : ""}
+        ${(t.is_done && t.done_by) ? `<br><small style="color:var(--green);font-size:10px;">✓ ${escapeHtml(t.done_by)}</small>` : ""}
+        ${(t.scheduled_date || t.scheduled_time) ? `<div class="schedule-info">📅 ${formatSchedule(t.scheduled_date, t.scheduled_time)}</div>` : ""}
       </div>
+      ${t.is_call_date ? '<span class="call-badge">📞 CALL</span>' : ""}
       ${t.priority === 3 ? '<span class="priority-badge priority-3">🔥</span>' : ""}
-      ${(t.is_mine || !t.is_done) ? `<button class="btn btn-ghost btn-sm" onclick="deleteTodo(${t.id}, '${state.currentTodoTab}')">×</button>` : ""}
+      ${(t.is_mine || !t.is_done) ? `<button class="btn btn-ghost btn-sm" onclick="deleteTodo(${t.id},'${state.currentTodoTab}')" style="color:var(--red);">×</button>` : ""}
     </div>
   `).join("");
 }
@@ -1196,38 +1307,39 @@ function renderTodos() {
 async function addTodo() {
   const input = document.getElementById("todo-input");
   const emojiInput = document.getElementById("todo-emoji-input");
+  const dateInput = document.getElementById("todo-date-input");
+  const timeInput = document.getElementById("todo-time-input");
+  const callToggle = document.getElementById("todo-call-toggle");
   const title = input.value.trim();
-  if (!title) { showToast("عنوان کار رو بنویس"); return; }
+  if (!title) { showToast("Enter a task title"); return; }
 
   const res = await apiPost("/api/todos/add/", {
     title,
     emoji: emojiInput.value.trim(),
     priority: state.todoPriority,
     is_private: state.currentTodoTab === "mine",
+    scheduled_date: dateInput.value || "",
+    scheduled_time: timeInput.value || "",
+    is_call_date: callToggle.checked,
   });
 
   if (res.ok) {
     const newTodo = {
-      id: res.todo.id,
-      title,
+      id: res.todo.id, title,
       emoji: emojiInput.value.trim(),
-      is_done: false,
-      priority: state.todoPriority,
-      owner_name: tgUser.first_name,
-      is_mine: true,
-      done_by: null,
+      is_done: false, priority: state.todoPriority,
+      owner_name: tgUser.first_name, is_mine: true, done_by: null,
+      scheduled_date: res.todo.scheduled_date,
+      scheduled_time: res.todo.scheduled_time,
+      is_call_date: res.todo.is_call_date,
+      created_at: new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }),
     };
-
-    if (state.currentTodoTab === "shared") {
-      state.sharedTodos.unshift(newTodo);
-    } else {
-      state.myTodos.unshift(newTodo);
-    }
-
+    if (state.currentTodoTab === "shared") state.sharedTodos.unshift(newTodo);
+    else state.myTodos.unshift(newTodo);
     renderTodos();
-    input.value = "";
-    emojiInput.value = "";
-    showToast("✅ کار اضافه شد");
+    input.value = ""; emojiInput.value = ""; dateInput.value = ""; timeInput.value = "";
+    callToggle.checked = false;
+    showToast("Task added");
   }
 }
 
@@ -1236,14 +1348,10 @@ async function toggleTodo(id) {
   if (res.ok) {
     const list = state.currentTodoTab === "shared" ? state.sharedTodos : state.myTodos;
     const todo = list.find(t => t.id === id);
-    if (todo) {
-      todo.is_done = res.is_done;
-      todo.done_by = res.done_by;
-    }
+    if (todo) { todo.is_done = res.is_done; todo.done_by = res.done_by; }
     renderTodos();
     if (res.is_done) {
-      showToast("🎉 انجام شد!");
-      // ویبرت تلگرام
+      showToast("Done!");
       tgWebApp?.HapticFeedback?.impactOccurred("medium");
     }
   }
@@ -1252,13 +1360,10 @@ async function toggleTodo(id) {
 async function deleteTodo(id, listType) {
   const res = await apiDelete(`/api/todos/${id}/`);
   if (res.ok) {
-    if (listType === "shared") {
-      state.sharedTodos = state.sharedTodos.filter(t => t.id !== id);
-    } else {
-      state.myTodos = state.myTodos.filter(t => t.id !== id);
-    }
+    if (listType === "shared") state.sharedTodos = state.sharedTodos.filter(t => t.id !== id);
+    else state.myTodos = state.myTodos.filter(t => t.id !== id);
     renderTodos();
-    showToast("🗑 حذف شد");
+    showToast("Deleted");
   }
 }
 
@@ -1271,20 +1376,16 @@ function buildVibePicker() {
   grid.innerHTML = VIBES.map(v => `
     <div class="vibe-option" data-emoji="${v.emoji}" data-label="${v.label}"
          onclick="pickVibe(this, '${v.emoji}', '${v.label}')">
-      ${v.emoji}
-      <span>${v.label}</span>
+      ${v.emoji}<span>${v.label}</span>
     </div>
   `).join("");
 }
 
-function openVibePicker() {
-  document.getElementById("vibe-modal").classList.add("open");
-}
+function openVibePicker() { document.getElementById("vibe-modal").classList.add("open"); }
 
 function closeVibeModal(e) {
-  if (e.target === document.getElementById("vibe-modal")) {
+  if (e.target === document.getElementById("vibe-modal"))
     document.getElementById("vibe-modal").classList.remove("open");
-  }
 }
 
 function pickVibe(el, emoji, label) {
@@ -1294,41 +1395,73 @@ function pickVibe(el, emoji, label) {
 }
 
 async function saveVibe() {
-  if (!state.selectedVibe) { showToast("یه وایب انتخاب کن"); return; }
-
+  if (!state.selectedVibe) { showToast("Pick a vibe first"); return; }
   const res = await apiPost("/api/vibe/update/", {
-    emoji: state.selectedVibe.emoji,
-    label: state.selectedVibe.label,
+    emoji: state.selectedVibe.emoji, label: state.selectedVibe.label,
   });
-
   if (res.ok) {
     state.user.vibe_emoji = res.vibe.emoji;
     state.user.vibe_label = res.vibe.label;
     renderHeader();
     document.getElementById("vibe-modal").classList.remove("open");
-    showToast(`${res.vibe.emoji} وایب ثبت شد`);
+    showToast(`${res.vibe.emoji} Vibe set`);
     tgWebApp?.HapticFeedback?.impactOccurred("light");
   }
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// GAME: TAP BATTLE
+// AI CHAT
+// ═══════════════════════════════════════════════════════════════════
+
+async function sendAiMessage() {
+  const input = document.getElementById("ai-input");
+  const message = input.value.trim();
+  if (!message) return;
+
+  // Show user message
+  const chatArea = document.getElementById("chat-messages");
+  chatArea.innerHTML += `
+    <div class="chat-msg user">
+      <div class="msg-role">You</div>
+      ${escapeHtml(message)}
+    </div>`;
+  chatArea.scrollTop = chatArea.scrollHeight;
+  input.value = "";
+
+  // Show typing indicator
+  document.getElementById("chat-typing").style.display = "block";
+
+  const res = await apiPost("/api/ai/chat/", { message });
+  document.getElementById("chat-typing").style.display = "none";
+
+  if (res.ok) {
+    chatArea.innerHTML += `
+      <div class="chat-msg assistant">
+        <div class="msg-role">Assistant</div>
+        ${escapeHtml(res.response).replace(/\n/g, "<br>")}
+      </div>`;
+  } else {
+    chatArea.innerHTML += `
+      <div class="chat-msg assistant" style="color:var(--red);">
+        <div class="msg-role">Error</div>
+        ${escapeHtml(res.error || "AI unavailable")}
+      </div>`;
+  }
+  chatArea.scrollTop = chatArea.scrollHeight;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// GAMES
 // ═══════════════════════════════════════════════════════════════════
 
 function selectGame(gameType) {
   state.currentGame = gameType;
-
-  // آپدیت UI انتخاب
   document.querySelectorAll(".game-option").forEach(o => o.classList.remove("active"));
   document.getElementById(`game-opt-${gameType}`).classList.add("active");
-
-  // نمایش arena مناسب
   document.getElementById("tap-arena").classList.remove("active");
   document.getElementById("reaction-arena").classList.remove("active");
   document.getElementById("memory-arena").classList.remove("active");
   document.getElementById(`${gameType === "tap" ? "tap" : gameType}-arena`).classList.add("active");
-
-  // reset بازی
   if (gameType === "tap") resetTapGame();
   if (gameType === "reaction") resetReaction();
   if (gameType === "memory") startMemory();
@@ -1336,39 +1469,29 @@ function selectGame(gameType) {
 
 function resetTapGame() {
   clearInterval(tapGame.timer);
-  tapGame.active = false;
-  tapGame.count = 0;
-  tapGame.timeLeft = 5;
+  tapGame.active = false; tapGame.count = 0; tapGame.timeLeft = 5;
   document.getElementById("tap-timer").textContent = "5";
   document.getElementById("tap-count").textContent = "0";
-  document.getElementById("tap-status").textContent = "شروع کن!";
+  document.getElementById("tap-status").textContent = "Start tapping!";
   document.getElementById("tap-btn").textContent = "🎯";
 }
 
 function handleTap() {
   if (!tapGame.active) {
-    // شروع بازی با اولین تپ
-    tapGame.active = true;
-    tapGame.count = 0;
+    tapGame.active = true; tapGame.count = 0;
     document.getElementById("tap-btn").textContent = "👆";
-
     tapGame.timer = setInterval(() => {
       tapGame.timeLeft--;
       document.getElementById("tap-timer").textContent = tapGame.timeLeft;
-
       if (tapGame.timeLeft <= 0) {
-        clearInterval(tapGame.timer);
-        tapGame.active = false;
+        clearInterval(tapGame.timer); tapGame.active = false;
         document.getElementById("tap-btn").textContent = "🔄";
-        document.getElementById("tap-status").textContent = `نتیجه: ${tapGame.count} تپ — تبریک!`;
-        // ارسال امتیاز
+        document.getElementById("tap-status").textContent = `Result: ${tapGame.count} taps!`;
         submitScore("tap_battle", tapGame.count);
-        // بعد از ۲ ثانیه reset
         setTimeout(resetTapGame, 3000);
       }
     }, 1000);
   }
-
   if (tapGame.active) {
     tapGame.count++;
     document.getElementById("tap-count").textContent = tapGame.count;
@@ -1376,88 +1499,56 @@ function handleTap() {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// GAME: REACTION TEST
-// ═══════════════════════════════════════════════════════════════════
-
 function resetReaction() {
   clearTimeout(reactionGame.timer);
-  reactionGame.active = false;
-  reactionGame.waiting = false;
+  reactionGame.active = false; reactionGame.waiting = false;
   const target = document.getElementById("reaction-target");
-  target.className = "reaction-target";
-  target.textContent = "⏳";
+  target.className = "reaction-target"; target.textContent = "⏳";
   document.getElementById("reaction-result").textContent = "";
 }
 
 function startReaction() {
-  resetReaction();
-  reactionGame.active = true;
+  resetReaction(); reactionGame.active = true;
   const target = document.getElementById("reaction-target");
-  target.className = "reaction-target wait";
-  target.textContent = "🛑";
-  document.getElementById("reaction-result").textContent = "صبر کن...";
-
-  // بین ۱ تا ۴ ثانیه تاخیر تصادفی
+  target.className = "reaction-target wait"; target.textContent = "🛑";
+  document.getElementById("reaction-result").textContent = "Wait...";
   const delay = 1000 + Math.random() * 3000;
   reactionGame.timer = setTimeout(() => {
     if (!reactionGame.active) return;
-    target.className = "reaction-target go";
-    target.textContent = "💚";
-    reactionGame.startTime = Date.now();
-    reactionGame.waiting = true;
-    document.getElementById("reaction-result").textContent = "بزن!";
+    target.className = "reaction-target go"; target.textContent = "💚";
+    reactionGame.startTime = Date.now(); reactionGame.waiting = true;
+    document.getElementById("reaction-result").textContent = "GO!";
   }, delay);
 }
 
 function handleReaction() {
   if (!reactionGame.active) return;
-
   if (!reactionGame.waiting) {
-    // زود زد
     clearTimeout(reactionGame.timer);
-    document.getElementById("reaction-result").textContent = "⚠️ خیلی زود زدی!";
-    resetReaction();
-    return;
+    document.getElementById("reaction-result").textContent = "Too early!";
+    resetReaction(); return;
   }
-
   const ms = Date.now() - reactionGame.startTime;
-  reactionGame.active = false;
-  reactionGame.waiting = false;
-  document.getElementById("reaction-result").textContent = `⚡ ${ms}ms`;
+  reactionGame.active = false; reactionGame.waiting = false;
+  document.getElementById("reaction-result").textContent = `${ms}ms`;
   document.getElementById("reaction-target").className = "reaction-target";
   document.getElementById("reaction-target").textContent = "✅";
-
-  // امتیاز: هرچی کمتر بهتر - معکوس کنیم
   const score = Math.max(0, 1000 - ms);
   submitScore("reaction", Math.round(score));
-  showToast(`⚡ ${ms} میلی‌ثانیه!`);
+  showToast(`${ms}ms reaction!`);
 }
-
-// ═══════════════════════════════════════════════════════════════════
-// GAME: MEMORY
-// ═══════════════════════════════════════════════════════════════════
 
 const MEM_EMOJIS = ["🔥", "⚡", "🎯", "💡", "🌊", "🎵", "🚀", "🌙"];
 
 function startMemory() {
-  // ساختن و shuffle کردن کارت‌ها
   const pairs = [...MEM_EMOJIS, ...MEM_EMOJIS];
-  // Fisher-Yates shuffle
   for (let i = pairs.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [pairs[i], pairs[j]] = [pairs[j], pairs[i]];
   }
-
-  memGame.cards = pairs;
-  memGame.flipped = [];
-  memGame.matches = 0;
-  memGame.errors = 0;
-  memGame.locked = false;
-
+  memGame.cards = pairs; memGame.flipped = []; memGame.matches = 0; memGame.errors = 0; memGame.locked = false;
   document.getElementById("mem-matches").textContent = "0";
   document.getElementById("mem-errors").textContent = "0";
-
   const grid = document.getElementById("memory-grid");
   grid.innerHTML = pairs.map((emoji, i) => `
     <div class="mem-card" id="mem-${i}" data-index="${i}" onclick="flipMemCard(${i})">
@@ -1469,44 +1560,33 @@ function startMemory() {
 function flipMemCard(index) {
   if (memGame.locked) return;
   if (memGame.flipped.includes(index)) return;
-
   const card = document.getElementById(`mem-${index}`);
   if (card.classList.contains("matched")) return;
-
   card.classList.add("flipped");
   memGame.flipped.push(index);
   tgWebApp?.HapticFeedback?.impactOccurred("light");
-
   if (memGame.flipped.length === 2) {
     memGame.locked = true;
     const [a, b] = memGame.flipped;
-
     if (memGame.cards[a] === memGame.cards[b]) {
-      // جفت پیدا شد
       setTimeout(() => {
         document.getElementById(`mem-${a}`).classList.add("matched");
         document.getElementById(`mem-${b}`).classList.add("matched");
-        memGame.matches++;
-        memGame.flipped = [];
-        memGame.locked = false;
+        memGame.matches++; memGame.flipped = []; memGame.locked = false;
         document.getElementById("mem-matches").textContent = memGame.matches;
-
         if (memGame.matches === 8) {
-          // تموم شد
           const score = Math.max(0, 800 - memGame.errors * 50);
           submitScore("memory", score);
-          showToast(`🎉 برنده شدی! امتیاز: ${score}`);
+          showToast(`You won! Score: ${score}`);
         }
       }, 400);
     } else {
-      // اشتباه
       memGame.errors++;
       document.getElementById("mem-errors").textContent = memGame.errors;
       setTimeout(() => {
         document.getElementById(`mem-${a}`).classList.remove("flipped");
         document.getElementById(`mem-${b}`).classList.remove("flipped");
-        memGame.flipped = [];
-        memGame.locked = false;
+        memGame.flipped = []; memGame.locked = false;
       }, 800);
     }
   }
@@ -1519,10 +1599,9 @@ function flipMemCard(index) {
 function renderLeaderboard() {
   const list = document.getElementById("leaderboard-list");
   if (!state.leaderboard.length) {
-    list.innerHTML = `<div class="empty-state"><div class="icon">🏆</div><p>هنوز بازی نشده</p></div>`;
+    list.innerHTML = `<div class="empty-state"><div class="icon">🏆</div><p>No games played yet</p></div>`;
     return;
   }
-
   list.innerHTML = state.leaderboard.map((u, i) => `
     <div class="leaderboard-row">
       <div class="lb-rank ${i === 0 ? "gold" : ""}">${i === 0 ? "🥇" : i + 1}</div>
@@ -1538,28 +1617,20 @@ async function loadLeaderboard() {
     if (res.ok) {
       state.leaderboard = res.leaderboard;
       renderLeaderboard();
-
-      // آخرین امتیازها
       const recentEl = document.getElementById("recent-scores");
       if (res.leaderboard.length) {
         recentEl.innerHTML = res.leaderboard.map(u =>
-          `<div style="margin-bottom:6px; color:var(--text)">
+          `<div style="margin-bottom:4px;color:var(--text)">
             ${u.vibe_emoji} ${u.first_name || u.name}
             ${Object.entries(u.best_scores || {}).map(([g, s]) =>
-              `<span style="margin-right:8px; color:var(--accent); font-size:12px">${g}: ${s}</span>`
+              `<span style="margin-left:6px;color:var(--accent);font-size:11px">${g}: ${s}</span>`
             ).join("")}
           </div>`
         ).join("");
       }
     }
-  } catch (e) {
-    console.error(e);
-  }
+  } catch (e) { console.error(e); }
 }
-
-// ═══════════════════════════════════════════════════════════════════
-// SUBMIT SCORE
-// ═══════════════════════════════════════════════════════════════════
 
 async function submitScore(gameType, score) {
   if (score <= 0) return;
@@ -1569,31 +1640,20 @@ async function submitScore(gameType, score) {
       state.user.total_points = res.new_total;
       state.leaderboard = res.leaderboard;
     }
-  } catch (e) {
-    console.error("Score submit failed:", e);
-  }
+  } catch (e) { console.error("Score submit failed:", e); }
 }
 
 // ═══════════════════════════════════════════════════════════════════
 // UTILS
 // ═══════════════════════════════════════════════════════════════════
 
-/**
- * نمایش toast notification موقت.
- * @param {string} msg - متن پیام
- * @param {number} duration - مدت نمایش به ms
- */
-function showToast(msg, duration = 2500) {
+function showToast(msg, duration = 2000) {
   const t = document.getElementById("toast");
   t.textContent = msg;
   t.classList.add("show");
   setTimeout(() => t.classList.remove("show"), duration);
 }
 
-/**
- * escape کردن HTML برای جلوگیری از XSS.
- * همیشه قبل از innerHTML از این استفاده کنید.
- */
 function escapeHtml(text) {
   const div = document.createElement("div");
   div.appendChild(document.createTextNode(text));

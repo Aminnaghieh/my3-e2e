@@ -1,7 +1,19 @@
 # ── Django stack ──────────────────────────────────────────────────────────────
 django==5.0.6
-gunicorn==22.0.0          # WSGI server برای production روی Render
-whitenoise==6.7.0         # سرو static files بدون nginx
+gunicorn==22.0.0
+whitenoise==6.7.0
 
 # ── Telegram ──────────────────────────────────────────────────────────────────
 python-telegram-bot==21.1.1
+
+# ── Cloudinary (media uploads) ────────────────────────────────────────────────
+cloudinary==1.41.0
+
+# ── Google Generative AI (Gemini Flash) ──────────────────────────────────────
+google-generativeai==0.8.4
+
+# ── Scheduler (keep-alive + reminders) ───────────────────────────────────────
+APScheduler==3.10.4
+
+# ── Async HTTP ────────────────────────────────────────────────────────────────
+aiohttp==3.11.11

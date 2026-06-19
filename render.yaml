@@ -1,15 +1,5 @@
 # render.yaml
-# ============
-# تنظیمات استقرار روی Render.
-#
-# ساختار: یه Web Service برای Django
-# ربات تلگرام (bot.py) رو می‌تونید روی Render یه Worker جداگانه بسازید
-# یا برای صرفه‌جویی در پلن رایگان از Bot API webhook استفاده کنید.
-#
-# راه‌اندازی اولیه در Render:
-#   1. repo رو connect کنید
-#   2. این فایل رو detect می‌کنه
-#   3. فقط Environment Variables رو باید ست کنید (BOT_TOKEN, SECRET_KEY, ...)
+# Phase 2 deployment config for Render.
 
 services:
   # ── Django Web Service ──────────────────────────────────────────
@@ -29,20 +19,30 @@ services:
       - key: DJANGO_SETTINGS_MODULE
         value: app.settings
       - key: SECRET_KEY
-        generateValue: true           # Render خودش generate می‌کنه
+        generateValue: true
       - key: DEBUG
         value: "False"
       - key: ALLOWED_HOSTS
-        sync: false                   # دامنه Render رو خودتون وارد کنید
+        sync: false
       - key: BOT_TOKEN
-        sync: false                   # از BotFather بگیرید
+        sync: false
       - key: ALLOWED_TG_IDS
-        sync: false                   # آیدی‌های تلگرام شما و دوست‌دخترتون
+        sync: false
       - key: WEB_APP_URL
-        sync: false                   # URL نهایی Render (بعد از deploy)
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: MEDIA_RETENTION_DAYS
+        value: "30"
 
-  # ── Telegram Bot Worker (اختیاری) ──────────────────────────────
-  # اگه پلن رایگان دارید، این رو comment کنید و از webhook استفاده کنید
+  # ── Telegram Bot Worker ─────────────────────────────────────────
+  # Uncomment for bot with keep-alive + reminders
   # - type: worker
   #   name: couple-routine-bot
   #   env: python
@@ -53,4 +53,8 @@ services:
   #     - key: BOT_TOKEN
   #       sync: false
   #     - key: WEB_APP_URL
+  #       sync: false
+  #     - key: GEMINI_API_KEY
+  #       sync: false
+  #     - key: ALLOWED_TG_IDS
   #       sync: false
