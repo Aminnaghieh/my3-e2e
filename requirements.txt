@@ -1,8 +1,0 @@
-﻿Django==4.2
-djangorestframework==3.14.0
-python-telegram-bot==20.7
-gunicorn==21.2.0
-whitenoise==6.5.0
-psycopg[binary]
-requests==2.31.0
-dj-database-url
