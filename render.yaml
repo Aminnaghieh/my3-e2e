@@ -1,0 +1,56 @@
+# render.yaml
+# ============
+# تنظیمات استقرار روی Render.
+#
+# ساختار: یه Web Service برای Django
+# ربات تلگرام (bot.py) رو می‌تونید روی Render یه Worker جداگانه بسازید
+# یا برای صرفه‌جویی در پلن رایگان از Bot API webhook استفاده کنید.
+#
+# راه‌اندازی اولیه در Render:
+#   1. repo رو connect کنید
+#   2. این فایل رو detect می‌کنه
+#   3. فقط Environment Variables رو باید ست کنید (BOT_TOKEN, SECRET_KEY, ...)
+
+services:
+  # ── Django Web Service ──────────────────────────────────────────
+  - type: web
+    name: couple-routine-app
+    env: python
+    plan: free
+
+    buildCommand: |
+      pip install -r requirements.txt
+      python manage.py migrate --no-input
+      python manage.py collectstatic --no-input
+
+    startCommand: gunicorn app.wsgi:application --bind 0.0.0.0:$PORT --workers 1
+
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: app.settings
+      - key: SECRET_KEY
+        generateValue: true           # Render خودش generate می‌کنه
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        sync: false                   # دامنه Render رو خودتون وارد کنید
+      - key: BOT_TOKEN
+        sync: false                   # از BotFather بگیرید
+      - key: ALLOWED_TG_IDS
+        sync: false                   # آیدی‌های تلگرام شما و دوست‌دخترتون
+      - key: WEB_APP_URL
+        sync: false                   # URL نهایی Render (بعد از deploy)
+
+  # ── Telegram Bot Worker (اختیاری) ──────────────────────────────
+  # اگه پلن رایگان دارید، این رو comment کنید و از webhook استفاده کنید
+  # - type: worker
+  #   name: couple-routine-bot
+  #   env: python
+  #   plan: free
+  #   buildCommand: pip install -r requirements.txt
+  #   startCommand: python bot.py
+  #   envVars:
+  #     - key: BOT_TOKEN
+  #       sync: false
+  #     - key: WEB_APP_URL
+  #       sync: false

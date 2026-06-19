@@ -1,0 +1,1609 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>روتین ما</title>
+
+  <!-- اسکریپت رسمی تلگرام - اول از همه لود بشه -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <style>
+    /* ═══════════════════════════════════════════════════════════════
+       DESIGN TOKENS
+       رنگ‌ها، فونت‌ها، و متغیرهای طراحی
+    ═══════════════════════════════════════════════════════════════ */
+    :root {
+      --bg:          #0d0f14;
+      --surface:     #161a23;
+      --surface-2:   #1e2330;
+      --border:      #252a38;
+      --accent:      #6c63ff;      /* بنفش - رنگ اصلی */
+      --accent-soft: rgba(108, 99, 255, 0.15);
+      --green:       #2dd4a0;
+      --red:         #ff5f7e;
+      --yellow:      #f7c948;
+      --text:        #e8eaf0;
+      --text-muted:  #7a8099;
+      --radius:      14px;
+      --radius-sm:   8px;
+      --font:        'Vazirmatn', system-ui, -apple-system, sans-serif;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       RESET & BASE
+    ═══════════════════════════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      /* فضا برای نوار پایین */
+      padding-bottom: 76px;
+      overflow-x: hidden;
+    }
+
+    button { cursor: pointer; border: none; font-family: var(--font); }
+    input, textarea {
+      font-family: var(--font);
+      outline: none;
+      border: none;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       LOADING SCREEN
+    ═══════════════════════════════════════════════════════════════ */
+    #loading {
+      position: fixed; inset: 0;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      z-index: 999;
+      transition: opacity 0.4s ease;
+    }
+    #loading.hidden { opacity: 0; pointer-events: none; }
+    .loader-ring {
+      width: 48px; height: 48px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loader-text { color: var(--text-muted); font-size: 14px; }
+
+    /* ═══════════════════════════════════════════════════════════════
+       HEADER
+    ═══════════════════════════════════════════════════════════════ */
+    #header {
+      position: sticky; top: 0; z-index: 10;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .header-vibes {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+    }
+    .vibe-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 4px 10px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .vibe-pill:hover { border-color: var(--accent); }
+    .vibe-pill .emoji { font-size: 18px; }
+    .vibe-pill .label { color: var(--text-muted); font-size: 12px; }
+
+    .header-sep {
+      color: var(--text-muted);
+      font-size: 18px;
+    }
+
+    .partner-vibe {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .partner-vibe .emoji { font-size: 18px; }
+
+    /* ═══════════════════════════════════════════════════════════════
+       TAB BAR (نوار پایین)
+    ═══════════════════════════════════════════════════════════════ */
+    #tab-bar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      z-index: 10;
+    }
+    .tab-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 4px;
+      gap: 3px;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 10px;
+      transition: color 0.2s;
+    }
+    .tab-btn .tab-icon { font-size: 20px; }
+    .tab-btn.active { color: var(--accent); }
+
+    /* ═══════════════════════════════════════════════════════════════
+       SCREENS (محتوای هر تب)
+    ═══════════════════════════════════════════════════════════════ */
+    .screen { display: none; padding: 16px; }
+    .screen.active { display: block; }
+
+    /* ═══════════════════════════════════════════════════════════════
+       CARDS
+    ═══════════════════════════════════════════════════════════════ */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      margin-bottom: 10px;
+    }
+    .card-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       INPUT GROUP
+    ═══════════════════════════════════════════════════════════════ */
+    .input-group {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .input-field {
+      flex: 1;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      color: var(--text);
+      font-size: 14px;
+      transition: border-color 0.2s;
+    }
+    .input-field:focus { border-color: var(--accent); }
+    .input-field::placeholder { color: var(--text-muted); }
+
+    .btn {
+      background: var(--accent);
+      color: #fff;
+      border-radius: var(--radius-sm);
+      padding: 10px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      transition: opacity 0.2s, transform 0.1s;
+      white-space: nowrap;
+    }
+    .btn:active { transform: scale(0.97); opacity: 0.9; }
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+    .btn-danger { background: var(--red); }
+
+    /* ═══════════════════════════════════════════════════════════════
+       NOTES (دیلی نوت)
+    ═══════════════════════════════════════════════════════════════ */
+    .note-item {
+      display: flex;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .note-item:last-child { border-bottom: none; }
+    .note-avatar {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: var(--accent-soft);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    .note-body { flex: 1; }
+    .note-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 3px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .note-text { font-size: 14px; line-height: 1.6; }
+    .note-mine { background: var(--accent-soft); border-radius: var(--radius-sm); padding: 8px 10px; }
+    .note-pin-badge {
+      font-size: 10px;
+      background: var(--yellow);
+      color: #000;
+      padding: 1px 5px;
+      border-radius: 4px;
+    }
+    .mood-tags {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    .mood-tag {
+      font-size: 20px;
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+    .mood-tag:hover, .mood-tag.selected { background: var(--accent-soft); }
+
+    /* ═══════════════════════════════════════════════════════════════
+       TODO LIST
+    ═══════════════════════════════════════════════════════════════ */
+    .todo-section-title {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin: 16px 0 8px;
+    }
+    .todo-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      margin-bottom: 6px;
+      transition: opacity 0.3s;
+    }
+    .todo-item.done { opacity: 0.5; }
+    .todo-checkbox {
+      width: 22px; height: 22px;
+      border-radius: 6px;
+      border: 2px solid var(--border);
+      background: transparent;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+    .todo-checkbox.checked {
+      background: var(--green);
+      border-color: var(--green);
+    }
+    .todo-checkbox.checked::after { content: "✓"; color: #fff; font-size: 13px; font-weight: bold; }
+    .todo-title {
+      flex: 1;
+      font-size: 14px;
+    }
+    .todo-title.done-text { text-decoration: line-through; color: var(--text-muted); }
+    .priority-badge {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: var(--surface-2);
+      color: var(--text-muted);
+    }
+    .priority-3 { background: rgba(255, 95, 126, 0.2); color: var(--red); }
+
+    /* ═══════════════════════════════════════════════════════════════
+       ROUTINES
+    ═══════════════════════════════════════════════════════════════ */
+    .routine-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .routine-card {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .routine-card.done {
+      border-color: var(--green);
+      background: rgba(45, 212, 160, 0.08);
+    }
+    .routine-card .r-emoji { font-size: 28px; margin-bottom: 6px; }
+    .routine-card .r-title { font-size: 12px; color: var(--text-muted); }
+    .routine-card.done .r-title { color: var(--green); }
+    .routine-card .r-check {
+      font-size: 11px;
+      margin-top: 6px;
+      color: var(--text-muted);
+    }
+    .routine-card.done .r-check { color: var(--green); }
+
+    /* ═══════════════════════════════════════════════════════════════
+       GAMES
+    ═══════════════════════════════════════════════════════════════ */
+    .game-select {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .game-option {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .game-option.active { border-color: var(--accent); }
+    .game-option .g-icon { font-size: 30px; margin-bottom: 6px; }
+    .game-option .g-name { font-size: 12px; color: var(--text-muted); }
+
+    /* Tap Battle game area */
+    #tap-arena {
+      display: none;
+      text-align: center;
+    }
+    #tap-arena.active { display: block; }
+    .tap-timer {
+      font-size: 48px;
+      font-weight: 900;
+      color: var(--accent);
+      line-height: 1;
+      margin: 20px 0 10px;
+    }
+    .tap-score {
+      font-size: 24px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+    #tap-btn {
+      width: 160px; height: 160px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 40px rgba(108, 99, 255, 0.4);
+      font-size: 32px;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto;
+      transition: transform 0.08s;
+      color: #fff;
+    }
+    #tap-btn:active { transform: scale(0.92); }
+
+    /* Reaction game */
+    #reaction-arena { display: none; text-align: center; }
+    #reaction-arena.active { display: block; }
+    .reaction-target {
+      width: 120px; height: 120px;
+      border-radius: 50%;
+      background: var(--surface-2);
+      margin: 30px auto;
+      transition: background 0.1s;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 36px;
+    }
+    .reaction-target.go { background: var(--green); }
+    .reaction-target.wait { background: var(--red); }
+
+    /* Memory game */
+    #memory-arena { display: none; }
+    #memory-arena.active { display: block; }
+    .memory-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin: 16px 0;
+    }
+    .mem-card {
+      aspect-ratio: 1;
+      border-radius: var(--radius-sm);
+      background: var(--surface-2);
+      border: 2px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      cursor: pointer;
+      transition: all 0.3s;
+      user-select: none;
+    }
+    .mem-card.flipped { background: var(--accent-soft); border-color: var(--accent); }
+    .mem-card.matched { background: rgba(45, 212, 160, 0.15); border-color: var(--green); }
+    .mem-card .mem-face { display: none; }
+    .mem-card.flipped .mem-face, .mem-card.matched .mem-face { display: block; }
+
+    /* ═══════════════════════════════════════════════════════════════
+       LEADERBOARD (پنل رقابتی)
+    ═══════════════════════════════════════════════════════════════ */
+    .leaderboard-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 8px;
+    }
+    .lb-rank {
+      font-size: 18px;
+      font-weight: 900;
+      color: var(--text-muted);
+      width: 28px;
+      text-align: center;
+    }
+    .lb-rank.gold { color: var(--yellow); }
+    .lb-name { flex: 1; font-size: 15px; }
+    .lb-points {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       VIBE PICKER (modal)
+    ═══════════════════════════════════════════════════════════════ */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 50;
+      display: flex; align-items: flex-end;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.25s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal-sheet {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius) var(--radius) 0 0;
+      padding: 20px 16px 32px;
+      width: 100%;
+      transform: translateY(100%);
+      transition: transform 0.3s ease;
+    }
+    .modal-overlay.open .modal-sheet { transform: translateY(0); }
+    .modal-handle {
+      width: 36px; height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      margin: 0 auto 16px;
+    }
+    .modal-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+    .vibe-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .vibe-option {
+      aspect-ratio: 1;
+      border-radius: var(--radius-sm);
+      background: var(--surface-2);
+      border: 2px solid var(--border);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      cursor: pointer;
+      font-size: 22px;
+      gap: 3px;
+      transition: border-color 0.2s;
+    }
+    .vibe-option:hover, .vibe-option.selected { border-color: var(--accent); background: var(--accent-soft); }
+    .vibe-option span { font-size: 9px; color: var(--text-muted); }
+
+    /* ═══════════════════════════════════════════════════════════════
+       TOAST / SNACKBAR
+    ═══════════════════════════════════════════════════════════════ */
+    #toast {
+      position: fixed;
+      bottom: 90px;
+      left: 50%; transform: translateX(-50%) translateY(20px);
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 8px 16px;
+      font-size: 13px;
+      white-space: nowrap;
+      z-index: 100;
+      opacity: 0;
+      transition: opacity 0.25s, transform 0.25s;
+      pointer-events: none;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ═══════════════════════════════════════════════════════════════
+       EMPTY STATE
+    ═══════════════════════════════════════════════════════════════ */
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-muted);
+    }
+    .empty-state .icon { font-size: 40px; margin-bottom: 10px; }
+    .empty-state p { font-size: 14px; }
+
+    /* ═══════════════════════════════════════════════════════════════
+       ANIMATIONS
+    ═══════════════════════════════════════════════════════════════ */
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .anim-in { animation: slideUp 0.25s ease forwards; }
+
+    @keyframes pop {
+      0%   { transform: scale(1); }
+      50%  { transform: scale(1.15); }
+      100% { transform: scale(1); }
+    }
+    .pop { animation: pop 0.2s ease; }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════ LOADING -->
+<div id="loading">
+  <div class="loader-ring"></div>
+  <p class="loader-text">در حال اتصال...</p>
+</div>
+
+<!-- ═══════════════════════════════════════════ HEADER -->
+<div id="header" style="display:none">
+  <div class="header-vibes">
+    <!-- وایب خودم -->
+    <div class="vibe-pill" id="my-vibe-pill" onclick="openVibePicker()">
+      <span class="emoji" id="my-vibe-emoji">✨</span>
+      <span class="label" id="my-vibe-label">وایب من</span>
+    </div>
+
+    <span class="header-sep">⟷</span>
+
+    <!-- وایب طرف مقابل -->
+    <div class="partner-vibe" id="partner-vibe-display">
+      <span class="emoji" id="partner-emoji">❓</span>
+      <span id="partner-name">طرف مقابل</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ SCREENS -->
+
+<!-- ── روتین‌ها ── -->
+<div id="screen-routine" class="screen active">
+  <div class="card">
+    <div class="card-title">روتین‌های امروز</div>
+    <div class="routine-grid" id="routine-grid">
+      <div class="empty-state" style="grid-column:span 2">
+        <div class="icon">📋</div>
+        <p>روتین‌ای ثبت نشده</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">روتین جدید</div>
+    <div class="input-group">
+      <input class="input-field" id="routine-emoji-input" placeholder="⚡" style="max-width:50px; text-align:center;" maxlength="2" />
+      <input class="input-field" id="routine-title-input" placeholder="مثلاً: آب خوردن صبح" />
+      <button class="btn" onclick="addRoutine()">+</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── دیلی نوت ── -->
+<div id="screen-notes" class="screen">
+  <div class="card">
+    <div class="card-title">نوت جدید</div>
+    <!-- انتخاب وضعیت احساسی -->
+    <div class="mood-tags" id="mood-tags">
+      <span class="mood-tag" data-emoji="💭" onclick="selectMood(this)">💭</span>
+      <span class="mood-tag" data-emoji="🔥" onclick="selectMood(this)">🔥</span>
+      <span class="mood-tag" data-emoji="😊" onclick="selectMood(this)">😊</span>
+      <span class="mood-tag" data-emoji="💤" onclick="selectMood(this)">💤</span>
+      <span class="mood-tag" data-emoji="😤" onclick="selectMood(this)">😤</span>
+      <span class="mood-tag" data-emoji="🎯" onclick="selectMood(this)">🎯</span>
+      <span class="mood-tag" data-emoji="💡" onclick="selectMood(this)">💡</span>
+      <span class="mood-tag" data-emoji="🌙" onclick="selectMood(this)">🌙</span>
+    </div>
+    <div class="input-group">
+      <input class="input-field" id="note-input" placeholder="چی تو ذهنته؟" />
+      <button class="btn" onclick="addNote()">ثبت</button>
+    </div>
+  </div>
+
+  <div id="notes-list">
+    <!-- نوت‌ها اینجا رندر میشن -->
+  </div>
+</div>
+
+<!-- ── To-Do ── -->
+<div id="screen-todo" class="screen">
+  <!-- تب داخلی: مشترک / شخصی -->
+  <div style="display:flex; gap:8px; margin-bottom:12px;">
+    <button class="btn btn-sm" id="todo-tab-shared" onclick="switchTodoTab('shared')" style="flex:1">مشترک 🤝</button>
+    <button class="btn btn-sm btn-ghost" id="todo-tab-mine" onclick="switchTodoTab('mine')" style="flex:1">شخصی 🔒</button>
+  </div>
+
+  <div class="card">
+    <div class="input-group">
+      <input class="input-field" id="todo-emoji-input" placeholder="📌" style="max-width:50px; text-align:center;" maxlength="2" />
+      <input class="input-field" id="todo-input" placeholder="کاری که باید انجام بشه..." />
+      <button class="btn" onclick="addTodo()">+</button>
+    </div>
+    <!-- اولویت -->
+    <div style="display:flex; gap:6px; margin-bottom:10px;">
+      <button class="btn btn-sm btn-ghost" id="prio-1" onclick="setPriority(1)" style="flex:1">عادی</button>
+      <button class="btn btn-sm btn-ghost" id="prio-2" onclick="setPriority(2)" style="flex:1">متوسط</button>
+      <button class="btn btn-sm" id="prio-3" onclick="setPriority(3)" style="flex:1; background: var(--red);">🔥 مهم</button>
+    </div>
+  </div>
+
+  <div id="todo-list">
+    <!-- آیتم‌ها اینجا رندر میشن -->
+  </div>
+</div>
+
+<!-- ── بازی ── -->
+<div id="screen-game" class="screen">
+  <div class="card">
+    <div class="card-title">انتخاب بازی</div>
+    <div class="game-select">
+      <div class="game-option active" id="game-opt-tap" onclick="selectGame('tap')">
+        <div class="g-icon">👆</div>
+        <div class="g-name">نبرد تپ</div>
+      </div>
+      <div class="game-option" id="game-opt-reaction" onclick="selectGame('reaction')">
+        <div class="g-icon">⚡</div>
+        <div class="g-name">تست واکنش</div>
+      </div>
+      <div class="game-option" id="game-opt-memory" onclick="selectGame('memory')">
+        <div class="g-icon">🧠</div>
+        <div class="g-name">حافظه</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- بازی تپ -->
+  <div id="tap-arena" class="anim-in">
+    <div class="card" style="text-align:center;">
+      <div class="tap-timer" id="tap-timer">5</div>
+      <div class="tap-score">تپ: <span id="tap-count">0</span></div>
+      <button id="tap-btn" onclick="handleTap()">🎯</button>
+      <p style="margin-top: 16px; color: var(--text-muted); font-size: 13px;" id="tap-status">
+        شروع کن!
+      </p>
+    </div>
+  </div>
+
+  <!-- بازی واکنش -->
+  <div id="reaction-arena">
+    <div class="card" style="text-align:center;">
+      <p style="color:var(--text-muted); font-size:14px; margin-bottom:8px;">وقتی سبز شد بزن!</p>
+      <div class="reaction-target" id="reaction-target" onclick="handleReaction()">⏳</div>
+      <p id="reaction-result" style="font-size:20px; font-weight:700; min-height:32px;"></p>
+      <button class="btn" onclick="startReaction()" style="margin-top:8px;">شروع</button>
+    </div>
+  </div>
+
+  <!-- بازی حافظه -->
+  <div id="memory-arena">
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <span style="font-size:13px; color:var(--text-muted);">جفت‌های پیدا شده: <span id="mem-matches">0</span>/8</span>
+        <span style="font-size:13px; color:var(--text-muted);">اشتباه: <span id="mem-errors">0</span></span>
+      </div>
+      <div class="memory-grid" id="memory-grid"></div>
+      <button class="btn" onclick="startMemory()" style="width:100%;">شروع جدید</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── رقابت ── -->
+<div id="screen-panel" class="screen">
+  <div class="card">
+    <div class="card-title">لیدربورد</div>
+    <div id="leaderboard-list">
+      <!-- رتبه‌بندی اینجا رندر میشه -->
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">آخرین امتیازها</div>
+    <div id="recent-scores" style="color:var(--text-muted); font-size:13px;">
+      در حال لود...
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ TAB BAR -->
+<div id="tab-bar" style="display:none">
+  <button class="tab-btn active" data-tab="routine" onclick="switchTab('routine')">
+    <span class="tab-icon">⚡</span>
+    <span>روتین</span>
+  </button>
+  <button class="tab-btn" data-tab="notes" onclick="switchTab('notes')">
+    <span class="tab-icon">📝</span>
+    <span>نوت</span>
+  </button>
+  <button class="tab-btn" data-tab="todo" onclick="switchTab('todo')">
+    <span class="tab-icon">✅</span>
+    <span>کارها</span>
+  </button>
+  <button class="tab-btn" data-tab="game" onclick="switchTab('game')">
+    <span class="tab-icon">🎮</span>
+    <span>بازی</span>
+  </button>
+  <button class="tab-btn" data-tab="panel" onclick="switchTab('panel')">
+    <span class="tab-icon">🏆</span>
+    <span>رقابت</span>
+  </button>
+</div>
+
+<!-- ═══════════════════════════════════════════ VIBE PICKER MODAL -->
+<div class="modal-overlay" id="vibe-modal" onclick="closeVibeModal(event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">وایب امروزت چیه؟</div>
+    <div class="vibe-grid" id="vibe-grid">
+      <!-- گزینه‌ها از JS رندر میشن -->
+    </div>
+    <button class="btn" style="width:100%" onclick="saveVibe()">ثبت وایب</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ TOAST -->
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// CONFIG & STATE
+// ═══════════════════════════════════════════════════════════════════
+
+/**
+ * آدرس سرور Django.
+ * در production اینجا URL render.com رو میذارید.
+ * در development "" که یعنی همون host.
+ */
+const API_BASE = "";
+
+/**
+ * اطلاعات کاربر از Telegram WebApp SDK.
+ * اگه خارج از تلگرام باز بشه (برای تست) یه fallback داریم.
+ */
+const tgWebApp = window.Telegram?.WebApp;
+const tgUser = tgWebApp?.initDataUnsafe?.user || {
+  id: 999999999,
+  first_name: "تست",
+  username: "test_user"
+};
+
+// State اپ - همه داده‌ها اینجا نگه داشته میشن
+const state = {
+  user: null,       // اطلاعات من از API
+  partner: null,    // اطلاعات طرف مقابل از API
+  notes: [],
+  sharedTodos: [],
+  myTodos: [],
+  routines: [],
+  leaderboard: [],
+  selectedMood: "",         // ایموجی انتخاب شده برای نوت
+  selectedVibe: null,       // وایب انتخاب شده (برای modal)
+  currentTodoTab: "shared", // تب فعال To-Do
+  currentGame: "tap",       // بازی انتخاب شده
+  todoPriority: 1,          // اولویت پیش‌فرض To-Do
+};
+
+// تنظیمات بازی تپ
+const tapGame = {
+  active: false,
+  count: 0,
+  timer: null,
+  timeLeft: 5,
+};
+
+// بازی واکنش
+const reactionGame = {
+  active: false,
+  startTime: null,
+  timer: null,
+  waiting: false,
+};
+
+// بازی حافظه
+const memGame = {
+  cards: [],
+  flipped: [],
+  matches: 0,
+  errors: 0,
+  locked: false,
+};
+
+// وایب‌های موجود برای انتخاب
+const VIBES = [
+  { emoji: "🔥", label: "داغ" },
+  { emoji: "😴", label: "خواب‌آلود" },
+  { emoji: "💪", label: "انرژی" },
+  { emoji: "🎯", label: "فوکوس" },
+  { emoji: "🌊", label: "آروم" },
+  { emoji: "⚡", label: "الکتریک" },
+  { emoji: "🌙", label: "شبانه" },
+  { emoji: "☕", label: "قهوه‌ای" },
+  { emoji: "😤", label: "مصمم" },
+  { emoji: "🌈", label: "خوشحال" },
+  { emoji: "🧊", label: "سرد" },
+  { emoji: "💭", label: "فکری" },
+  { emoji: "🎵", label: "موزیکال" },
+  { emoji: "🌸", label: "ملایم" },
+  { emoji: "🚀", label: "رکت" },
+];
+
+// ═══════════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════════
+
+/**
+ * تابع اصلی که بعد از لود صفحه اجرا میشه.
+ * ترتیب: تنظیم تلگرام → لود داده → رندر UI
+ */
+async function init() {
+  // تلگرام رو آماده کن
+  if (tgWebApp) {
+    tgWebApp.ready();
+    tgWebApp.expand(); // صفحه رو fullscreen کن
+  }
+
+  // لود داده از سرور
+  try {
+    const data = await apiGet(
+      `/api/dashboard/?tg_id=${tgUser.id}&name=${encodeURIComponent(tgUser.first_name)}&username=${tgUser.username || ""}`
+    );
+
+    if (data.ok) {
+      // ذخیره در state
+      state.user = data.user;
+      state.partner = data.partner;
+      state.notes = data.notes;
+      state.sharedTodos = data.shared_todos;
+      state.myTodos = data.my_todos;
+      state.routines = data.routines;
+      state.leaderboard = data.leaderboard;
+
+      // رندر اولیه
+      renderHeader();
+      renderRoutines();
+      renderNotes();
+      renderTodos();
+      renderLeaderboard();
+      buildVibePicker();
+
+      // نمایش UI
+      document.getElementById("header").style.display = "flex";
+      document.getElementById("tab-bar").style.display = "grid";
+    } else {
+      showToast("❌ خطا در اتصال");
+    }
+  } catch (e) {
+    console.error(e);
+    showToast("❌ اتصال به سرور برقرار نشد");
+  }
+
+  // مخفی کردن loading
+  const loadEl = document.getElementById("loading");
+  loadEl.classList.add("hidden");
+  setTimeout(() => loadEl.remove(), 500);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// API HELPERS
+// ═══════════════════════════════════════════════════════════════════
+
+/**
+ * GET request به API.
+ * @param {string} url - مسیر کامل endpoint
+ */
+async function apiGet(url) {
+  const res = await fetch(API_BASE + url);
+  return res.json();
+}
+
+/**
+ * POST request به API.
+ * @param {string} url - مسیر endpoint
+ * @param {object} body - داده‌ای که میفرستیم
+ */
+async function apiPost(url, body = {}) {
+  const res = await fetch(API_BASE + url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ tg_id: tgUser.id, name: tgUser.first_name, ...body }),
+  });
+  return res.json();
+}
+
+/**
+ * DELETE request به API.
+ * @param {string} url
+ */
+async function apiDelete(url) {
+  const res = await fetch(API_BASE + url + `?tg_id=${tgUser.id}`, {
+    method: "DELETE",
+  });
+  return res.json();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// HEADER
+// ═══════════════════════════════════════════════════════════════════
+
+function renderHeader() {
+  if (!state.user) return;
+
+  document.getElementById("my-vibe-emoji").textContent = state.user.vibe_emoji;
+  document.getElementById("my-vibe-label").textContent = state.user.vibe_label;
+
+  if (state.partner) {
+    document.getElementById("partner-emoji").textContent = state.partner.vibe_emoji;
+    document.getElementById("partner-name").textContent = state.partner.name;
+  } else {
+    document.getElementById("partner-vibe-display").textContent = "هنوز وصل نشده";
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// TAB SWITCHING
+// ═══════════════════════════════════════════════════════════════════
+
+function switchTab(tabName) {
+  // غیرفعال کردن همه
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+
+  // فعال کردن انتخابی
+  document.getElementById(`screen-${tabName}`).classList.add("active");
+  document.querySelector(`[data-tab="${tabName}"]`).classList.add("active");
+
+  // اگه رفتیم پنل، لیدربورد رو reload کنیم
+  if (tabName === "panel") loadLeaderboard();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// ROUTINES
+// ═══════════════════════════════════════════════════════════════════
+
+function renderRoutines() {
+  const grid = document.getElementById("routine-grid");
+
+  if (!state.routines.length) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:span 2">
+      <div class="icon">📋</div><p>روتین‌ای ثبت نشده</p></div>`;
+    return;
+  }
+
+  grid.innerHTML = state.routines.map(r => `
+    <div class="routine-card ${r.done_today ? "done" : ""}" id="routine-${r.id}"
+         onclick="checkRoutine(${r.id})">
+      <div class="r-emoji">${r.emoji}</div>
+      <div class="r-title">${r.title}</div>
+      <div class="r-check">${r.done_today ? "✓ انجام شد" : "○ انجام نشده"}</div>
+    </div>
+  `).join("");
+}
+
+async function addRoutine() {
+  const titleEl = document.getElementById("routine-title-input");
+  const emojiEl = document.getElementById("routine-emoji-input");
+  const title = titleEl.value.trim();
+  const emoji = emojiEl.value.trim() || "⚡";
+
+  if (!title) { showToast("عنوان روتین وارد کن"); return; }
+
+  const res = await apiPost("/api/routines/add/", { title, emoji });
+  if (res.ok) {
+    // اضافه کردن به state و رندر
+    state.routines.push(res.routine);
+    renderRoutines();
+    titleEl.value = "";
+    emojiEl.value = "";
+    showToast("✅ روتین اضافه شد");
+  }
+}
+
+async function checkRoutine(id) {
+  const res = await apiPost(`/api/routines/${id}/check/`);
+  if (res.ok) {
+    // آپدیت state
+    const r = state.routines.find(x => x.id === id);
+    if (r) r.done_today = res.done_today;
+
+    // انیمیشن روی کارت
+    const card = document.getElementById(`routine-${id}`);
+    card.classList.toggle("done", res.done_today);
+    card.querySelector(".r-check").textContent = res.done_today ? "✓ انجام شد" : "○ انجام نشده";
+    card.classList.add("pop");
+    setTimeout(() => card.classList.remove("pop"), 300);
+
+    showToast(res.done_today ? "✅ روتین انجام شد!" : "↩️ undo شد");
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// DAILY NOTES
+// ═══════════════════════════════════════════════════════════════════
+
+function selectMood(el) {
+  document.querySelectorAll(".mood-tag").forEach(t => t.classList.remove("selected"));
+  el.classList.add("selected");
+  state.selectedMood = el.dataset.emoji;
+}
+
+function renderNotes() {
+  const list = document.getElementById("notes-list");
+
+  if (!state.notes.length) {
+    list.innerHTML = `<div class="empty-state"><div class="icon">📝</div><p>اولین نوت رو بنویس!</p></div>`;
+    return;
+  }
+
+  list.innerHTML = state.notes.map(n => `
+    <div class="card anim-in">
+      <div class="note-item">
+        <div class="note-avatar">${n.mood_tag || "💬"}</div>
+        <div class="note-body">
+          <div class="note-meta">
+            <strong>${n.author_name}</strong>
+            <span>${n.created_at}</span>
+            ${n.is_pinned ? '<span class="note-pin-badge">📌 پین</span>' : ""}
+          </div>
+          <div class="note-text ${n.is_mine ? "note-mine" : ""}">${escapeHtml(n.text)}</div>
+        </div>
+        ${n.is_mine ? `<button class="btn btn-ghost btn-sm" onclick="deleteNote(${n.id}, this)" style="align-self:flex-start">×</button>` : ""}
+      </div>
+    </div>
+  `).join("");
+}
+
+async function addNote() {
+  const input = document.getElementById("note-input");
+  const text = input.value.trim();
+  if (!text) { showToast("متن نوت رو بنویس"); return; }
+
+  const res = await apiPost("/api/notes/add/", {
+    text,
+    mood_tag: state.selectedMood,
+  });
+
+  if (res.ok) {
+    // اضافه کردن به اول لیست (جدیدترین اول)
+    state.notes.unshift({
+      id: res.note.id,
+      text: res.note.text,
+      mood_tag: res.note.mood_tag,
+      author_name: tgUser.first_name,
+      author_id: tgUser.id,
+      is_mine: true,
+      is_pinned: false,
+      created_at: res.note.created_at,
+    });
+    renderNotes();
+    input.value = "";
+    state.selectedMood = "";
+    document.querySelectorAll(".mood-tag").forEach(t => t.classList.remove("selected"));
+    showToast("✅ نوت ثبت شد");
+  }
+}
+
+async function deleteNote(id, btn) {
+  btn.disabled = true;
+  const res = await apiDelete(`/api/notes/${id}/`);
+  if (res.ok) {
+    state.notes = state.notes.filter(n => n.id !== id);
+    renderNotes();
+    showToast("🗑 نوت حذف شد");
+  } else {
+    btn.disabled = false;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// TO-DO LIST
+// ═══════════════════════════════════════════════════════════════════
+
+function switchTodoTab(tab) {
+  state.currentTodoTab = tab;
+  const shared = document.getElementById("todo-tab-shared");
+  const mine = document.getElementById("todo-tab-mine");
+
+  if (tab === "shared") {
+    shared.classList.remove("btn-ghost");
+    mine.classList.add("btn-ghost");
+  } else {
+    mine.classList.remove("btn-ghost");
+    shared.classList.add("btn-ghost");
+  }
+  renderTodos();
+}
+
+function setPriority(p) {
+  state.todoPriority = p;
+  [1, 2, 3].forEach(i => {
+    const btn = document.getElementById(`prio-${i}`);
+    btn.classList.toggle("btn-ghost", i !== p);
+    if (i !== p && i !== 3) btn.style.background = "";
+    if (i === 3 && i === p) btn.style.background = "var(--red)";
+  });
+}
+
+function renderTodos() {
+  const list = document.getElementById("todo-list");
+  const items = state.currentTodoTab === "shared" ? state.sharedTodos : state.myTodos;
+
+  if (!items.length) {
+    list.innerHTML = `<div class="empty-state"><div class="icon">✅</div><p>کاری ثبت نشده</p></div>`;
+    return;
+  }
+
+  list.innerHTML = items.map(t => `
+    <div class="todo-item ${t.is_done ? "done" : ""}" id="todo-${t.id}">
+      <div class="todo-checkbox ${t.is_done ? "checked" : ""}" onclick="toggleTodo(${t.id})"></div>
+      <div class="todo-title ${t.is_done ? "done-text" : ""}">
+        ${t.emoji ? t.emoji + " " : ""}${escapeHtml(t.title)}
+        ${state.currentTodoTab === "shared" && t.owner_name ? `<br><small style="color:var(--text-muted); font-size:11px;">${t.owner_name}</small>` : ""}
+        ${t.is_done && t.done_by ? `<br><small style="color:var(--green); font-size:11px;">✓ ${t.done_by}</small>` : ""}
+      </div>
+      ${t.priority === 3 ? '<span class="priority-badge priority-3">🔥</span>' : ""}
+      ${(t.is_mine || !t.is_done) ? `<button class="btn btn-ghost btn-sm" onclick="deleteTodo(${t.id}, '${state.currentTodoTab}')">×</button>` : ""}
+    </div>
+  `).join("");
+}
+
+async function addTodo() {
+  const input = document.getElementById("todo-input");
+  const emojiInput = document.getElementById("todo-emoji-input");
+  const title = input.value.trim();
+  if (!title) { showToast("عنوان کار رو بنویس"); return; }
+
+  const res = await apiPost("/api/todos/add/", {
+    title,
+    emoji: emojiInput.value.trim(),
+    priority: state.todoPriority,
+    is_private: state.currentTodoTab === "mine",
+  });
+
+  if (res.ok) {
+    const newTodo = {
+      id: res.todo.id,
+      title,
+      emoji: emojiInput.value.trim(),
+      is_done: false,
+      priority: state.todoPriority,
+      owner_name: tgUser.first_name,
+      is_mine: true,
+      done_by: null,
+    };
+
+    if (state.currentTodoTab === "shared") {
+      state.sharedTodos.unshift(newTodo);
+    } else {
+      state.myTodos.unshift(newTodo);
+    }
+
+    renderTodos();
+    input.value = "";
+    emojiInput.value = "";
+    showToast("✅ کار اضافه شد");
+  }
+}
+
+async function toggleTodo(id) {
+  const res = await apiPost(`/api/todos/${id}/toggle/`);
+  if (res.ok) {
+    const list = state.currentTodoTab === "shared" ? state.sharedTodos : state.myTodos;
+    const todo = list.find(t => t.id === id);
+    if (todo) {
+      todo.is_done = res.is_done;
+      todo.done_by = res.done_by;
+    }
+    renderTodos();
+    if (res.is_done) {
+      showToast("🎉 انجام شد!");
+      // ویبرت تلگرام
+      tgWebApp?.HapticFeedback?.impactOccurred("medium");
+    }
+  }
+}
+
+async function deleteTodo(id, listType) {
+  const res = await apiDelete(`/api/todos/${id}/`);
+  if (res.ok) {
+    if (listType === "shared") {
+      state.sharedTodos = state.sharedTodos.filter(t => t.id !== id);
+    } else {
+      state.myTodos = state.myTodos.filter(t => t.id !== id);
+    }
+    renderTodos();
+    showToast("🗑 حذف شد");
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// VIBE PICKER
+// ═══════════════════════════════════════════════════════════════════
+
+function buildVibePicker() {
+  const grid = document.getElementById("vibe-grid");
+  grid.innerHTML = VIBES.map(v => `
+    <div class="vibe-option" data-emoji="${v.emoji}" data-label="${v.label}"
+         onclick="pickVibe(this, '${v.emoji}', '${v.label}')">
+      ${v.emoji}
+      <span>${v.label}</span>
+    </div>
+  `).join("");
+}
+
+function openVibePicker() {
+  document.getElementById("vibe-modal").classList.add("open");
+}
+
+function closeVibeModal(e) {
+  if (e.target === document.getElementById("vibe-modal")) {
+    document.getElementById("vibe-modal").classList.remove("open");
+  }
+}
+
+function pickVibe(el, emoji, label) {
+  document.querySelectorAll(".vibe-option").forEach(v => v.classList.remove("selected"));
+  el.classList.add("selected");
+  state.selectedVibe = { emoji, label };
+}
+
+async function saveVibe() {
+  if (!state.selectedVibe) { showToast("یه وایب انتخاب کن"); return; }
+
+  const res = await apiPost("/api/vibe/update/", {
+    emoji: state.selectedVibe.emoji,
+    label: state.selectedVibe.label,
+  });
+
+  if (res.ok) {
+    state.user.vibe_emoji = res.vibe.emoji;
+    state.user.vibe_label = res.vibe.label;
+    renderHeader();
+    document.getElementById("vibe-modal").classList.remove("open");
+    showToast(`${res.vibe.emoji} وایب ثبت شد`);
+    tgWebApp?.HapticFeedback?.impactOccurred("light");
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// GAME: TAP BATTLE
+// ═══════════════════════════════════════════════════════════════════
+
+function selectGame(gameType) {
+  state.currentGame = gameType;
+
+  // آپدیت UI انتخاب
+  document.querySelectorAll(".game-option").forEach(o => o.classList.remove("active"));
+  document.getElementById(`game-opt-${gameType}`).classList.add("active");
+
+  // نمایش arena مناسب
+  document.getElementById("tap-arena").classList.remove("active");
+  document.getElementById("reaction-arena").classList.remove("active");
+  document.getElementById("memory-arena").classList.remove("active");
+  document.getElementById(`${gameType === "tap" ? "tap" : gameType}-arena`).classList.add("active");
+
+  // reset بازی
+  if (gameType === "tap") resetTapGame();
+  if (gameType === "reaction") resetReaction();
+  if (gameType === "memory") startMemory();
+}
+
+function resetTapGame() {
+  clearInterval(tapGame.timer);
+  tapGame.active = false;
+  tapGame.count = 0;
+  tapGame.timeLeft = 5;
+  document.getElementById("tap-timer").textContent = "5";
+  document.getElementById("tap-count").textContent = "0";
+  document.getElementById("tap-status").textContent = "شروع کن!";
+  document.getElementById("tap-btn").textContent = "🎯";
+}
+
+function handleTap() {
+  if (!tapGame.active) {
+    // شروع بازی با اولین تپ
+    tapGame.active = true;
+    tapGame.count = 0;
+    document.getElementById("tap-btn").textContent = "👆";
+
+    tapGame.timer = setInterval(() => {
+      tapGame.timeLeft--;
+      document.getElementById("tap-timer").textContent = tapGame.timeLeft;
+
+      if (tapGame.timeLeft <= 0) {
+        clearInterval(tapGame.timer);
+        tapGame.active = false;
+        document.getElementById("tap-btn").textContent = "🔄";
+        document.getElementById("tap-status").textContent = `نتیجه: ${tapGame.count} تپ — تبریک!`;
+        // ارسال امتیاز
+        submitScore("tap_battle", tapGame.count);
+        // بعد از ۲ ثانیه reset
+        setTimeout(resetTapGame, 3000);
+      }
+    }, 1000);
+  }
+
+  if (tapGame.active) {
+    tapGame.count++;
+    document.getElementById("tap-count").textContent = tapGame.count;
+    tgWebApp?.HapticFeedback?.impactOccurred("light");
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// GAME: REACTION TEST
+// ═══════════════════════════════════════════════════════════════════
+
+function resetReaction() {
+  clearTimeout(reactionGame.timer);
+  reactionGame.active = false;
+  reactionGame.waiting = false;
+  const target = document.getElementById("reaction-target");
+  target.className = "reaction-target";
+  target.textContent = "⏳";
+  document.getElementById("reaction-result").textContent = "";
+}
+
+function startReaction() {
+  resetReaction();
+  reactionGame.active = true;
+  const target = document.getElementById("reaction-target");
+  target.className = "reaction-target wait";
+  target.textContent = "🛑";
+  document.getElementById("reaction-result").textContent = "صبر کن...";
+
+  // بین ۱ تا ۴ ثانیه تاخیر تصادفی
+  const delay = 1000 + Math.random() * 3000;
+  reactionGame.timer = setTimeout(() => {
+    if (!reactionGame.active) return;
+    target.className = "reaction-target go";
+    target.textContent = "💚";
+    reactionGame.startTime = Date.now();
+    reactionGame.waiting = true;
+    document.getElementById("reaction-result").textContent = "بزن!";
+  }, delay);
+}
+
+function handleReaction() {
+  if (!reactionGame.active) return;
+
+  if (!reactionGame.waiting) {
+    // زود زد
+    clearTimeout(reactionGame.timer);
+    document.getElementById("reaction-result").textContent = "⚠️ خیلی زود زدی!";
+    resetReaction();
+    return;
+  }
+
+  const ms = Date.now() - reactionGame.startTime;
+  reactionGame.active = false;
+  reactionGame.waiting = false;
+  document.getElementById("reaction-result").textContent = `⚡ ${ms}ms`;
+  document.getElementById("reaction-target").className = "reaction-target";
+  document.getElementById("reaction-target").textContent = "✅";
+
+  // امتیاز: هرچی کمتر بهتر - معکوس کنیم
+  const score = Math.max(0, 1000 - ms);
+  submitScore("reaction", Math.round(score));
+  showToast(`⚡ ${ms} میلی‌ثانیه!`);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// GAME: MEMORY
+// ═══════════════════════════════════════════════════════════════════
+
+const MEM_EMOJIS = ["🔥", "⚡", "🎯", "💡", "🌊", "🎵", "🚀", "🌙"];
+
+function startMemory() {
+  // ساختن و shuffle کردن کارت‌ها
+  const pairs = [...MEM_EMOJIS, ...MEM_EMOJIS];
+  // Fisher-Yates shuffle
+  for (let i = pairs.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pairs[i], pairs[j]] = [pairs[j], pairs[i]];
+  }
+
+  memGame.cards = pairs;
+  memGame.flipped = [];
+  memGame.matches = 0;
+  memGame.errors = 0;
+  memGame.locked = false;
+
+  document.getElementById("mem-matches").textContent = "0";
+  document.getElementById("mem-errors").textContent = "0";
+
+  const grid = document.getElementById("memory-grid");
+  grid.innerHTML = pairs.map((emoji, i) => `
+    <div class="mem-card" id="mem-${i}" data-index="${i}" onclick="flipMemCard(${i})">
+      <span class="mem-face">${emoji}</span>
+    </div>
+  `).join("");
+}
+
+function flipMemCard(index) {
+  if (memGame.locked) return;
+  if (memGame.flipped.includes(index)) return;
+
+  const card = document.getElementById(`mem-${index}`);
+  if (card.classList.contains("matched")) return;
+
+  card.classList.add("flipped");
+  memGame.flipped.push(index);
+  tgWebApp?.HapticFeedback?.impactOccurred("light");
+
+  if (memGame.flipped.length === 2) {
+    memGame.locked = true;
+    const [a, b] = memGame.flipped;
+
+    if (memGame.cards[a] === memGame.cards[b]) {
+      // جفت پیدا شد
+      setTimeout(() => {
+        document.getElementById(`mem-${a}`).classList.add("matched");
+        document.getElementById(`mem-${b}`).classList.add("matched");
+        memGame.matches++;
+        memGame.flipped = [];
+        memGame.locked = false;
+        document.getElementById("mem-matches").textContent = memGame.matches;
+
+        if (memGame.matches === 8) {
+          // تموم شد
+          const score = Math.max(0, 800 - memGame.errors * 50);
+          submitScore("memory", score);
+          showToast(`🎉 برنده شدی! امتیاز: ${score}`);
+        }
+      }, 400);
+    } else {
+      // اشتباه
+      memGame.errors++;
+      document.getElementById("mem-errors").textContent = memGame.errors;
+      setTimeout(() => {
+        document.getElementById(`mem-${a}`).classList.remove("flipped");
+        document.getElementById(`mem-${b}`).classList.remove("flipped");
+        memGame.flipped = [];
+        memGame.locked = false;
+      }, 800);
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// LEADERBOARD
+// ═══════════════════════════════════════════════════════════════════
+
+function renderLeaderboard() {
+  const list = document.getElementById("leaderboard-list");
+  if (!state.leaderboard.length) {
+    list.innerHTML = `<div class="empty-state"><div class="icon">🏆</div><p>هنوز بازی نشده</p></div>`;
+    return;
+  }
+
+  list.innerHTML = state.leaderboard.map((u, i) => `
+    <div class="leaderboard-row">
+      <div class="lb-rank ${i === 0 ? "gold" : ""}">${i === 0 ? "🥇" : i + 1}</div>
+      <div class="lb-name">${u.vibe_emoji} ${u.first_name || u.name}</div>
+      <div class="lb-points">${u.total_points} pt</div>
+    </div>
+  `).join("");
+}
+
+async function loadLeaderboard() {
+  try {
+    const res = await apiGet("/api/leaderboard/");
+    if (res.ok) {
+      state.leaderboard = res.leaderboard;
+      renderLeaderboard();
+
+      // آخرین امتیازها
+      const recentEl = document.getElementById("recent-scores");
+      if (res.leaderboard.length) {
+        recentEl.innerHTML = res.leaderboard.map(u =>
+          `<div style="margin-bottom:6px; color:var(--text)">
+            ${u.vibe_emoji} ${u.first_name || u.name}
+            ${Object.entries(u.best_scores || {}).map(([g, s]) =>
+              `<span style="margin-right:8px; color:var(--accent); font-size:12px">${g}: ${s}</span>`
+            ).join("")}
+          </div>`
+        ).join("");
+      }
+    }
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// SUBMIT SCORE
+// ═══════════════════════════════════════════════════════════════════
+
+async function submitScore(gameType, score) {
+  if (score <= 0) return;
+  try {
+    const res = await apiPost("/api/game/score/", { game_type: gameType, score });
+    if (res.ok && state.user) {
+      state.user.total_points = res.new_total;
+      state.leaderboard = res.leaderboard;
+    }
+  } catch (e) {
+    console.error("Score submit failed:", e);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════════════════
+
+/**
+ * نمایش toast notification موقت.
+ * @param {string} msg - متن پیام
+ * @param {number} duration - مدت نمایش به ms
+ */
+function showToast(msg, duration = 2500) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), duration);
+}
+
+/**
+ * escape کردن HTML برای جلوگیری از XSS.
+ * همیشه قبل از innerHTML از این استفاده کنید.
+ */
+function escapeHtml(text) {
+  const div = document.createElement("div");
+  div.appendChild(document.createTextNode(text));
+  return div.innerHTML;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// START
+// ═══════════════════════════════════════════════════════════════════
+document.addEventListener("DOMContentLoaded", init);
+</script>
+</body>
+</html>

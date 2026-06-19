@@ -1,0 +1,7 @@
+# ── Django stack ──────────────────────────────────────────────────────────────
+django==5.0.6
+gunicorn==22.0.0          # WSGI server برای production روی Render
+whitenoise==6.7.0         # سرو static files بدون nginx
+
+# ── Telegram ──────────────────────────────────────────────────────────────────
+python-telegram-bot==21.1.1
