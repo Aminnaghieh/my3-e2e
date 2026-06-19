@@ -5,3 +5,4 @@ gunicorn==21.2.0
 whitenoise==6.5.0
 psycopg2-binary==2.9.9 # برای دیتابیس PostgreSQL
 requests==2.31.0
+dj-database-url
