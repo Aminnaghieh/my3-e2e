@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-import dj_database_url  # برای اتصال به دیتابیس روی Render
+import my3-e2e  # برای اتصال به دیتابیس روی Render
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
