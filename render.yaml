@@ -1,0 +1,23 @@
+﻿services:
+  - type: web
+    name: love-mini-app
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn love_app.wsgi:application
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.0
+      # برای دیتابیس، حتما باید یک دیتابیس رایگان PostgreSQL در Render یا ElephantSQL بسازید و لینک آن را اینجا بدهید
+      - key: DATABASE_URL
+        fromDatabase:
+          name: love-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: False
+
+databases:
+  - name: love-db
+    plan: free # دیتابیس رایگان (روی پلن رایگان 90 روز اعتبار دارد)
+    ipAllowList: []

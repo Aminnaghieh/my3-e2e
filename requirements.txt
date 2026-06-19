@@ -1,0 +1,7 @@
+﻿Django==4.2
+djangorestframework==3.14.0
+python-telegram-bot==20.7
+gunicorn==21.2.0
+whitenoise==6.5.0
+psycopg2-binary==2.9.9 # برای دیتابیس PostgreSQL
+requests==2.31.0
