@@ -18,5 +18,5 @@ APScheduler==3.10.4
 # ── Async HTTP ────────────────────────────────────────────────────────────────
 aiohttp==3.11.11
 
-psycopg[binary]==3.2.1
+psycopg[binary]==3.3.4
 dj-database-url==2.1.0
