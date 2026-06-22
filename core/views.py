@@ -369,8 +369,27 @@ def dashboard(request):
 @require_http_methods(["POST"])
 def set_offline(request):
     """Mark user as offline when they leave the mini-app."""
+    # Try multiple sources for tg_id: body JSON, query params, body form data, raw body
+    tg_id = None
+
+    # 1. Try JSON body
     data = parse_body(request)
     tg_id = require_tg_id(data)
+
+    # 2. Try query params
+    if not tg_id:
+        tg_id = require_tg_id(request.GET)
+
+    # 3. Try raw body (for sendBeacon which sends text/plain)
+    if not tg_id:
+        try:
+            raw = request.body
+            if raw:
+                raw_data = json.loads(raw.decode("utf-8"))
+                tg_id = require_tg_id(raw_data)
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            pass
+
     if not tg_id:
         return error_response("tg_id required", 401)
 
@@ -893,7 +912,7 @@ def ai_chat(request):
     history = list(reversed(list(recent)))
 
     try:
-        model = genai.GenerativeModel("gemini-3.5-flash")
+        model = genai.GenerativeModel("gemini-2.0-flash")
 
         # Build conversation
         chat_history = []

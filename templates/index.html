@@ -857,7 +857,35 @@
 
 const API_BASE = "";
 const tgWebApp = window.Telegram?.WebApp;
-const tgUser = tgWebApp?.initDataUnsafe?.user || {
+
+// ── SECURITY GATE ─────────────────────────────────────────────────────────
+// Detect if running inside Telegram (mobile or desktop).
+// If NOT in Telegram → show "Bot is Live" and hide everything else.
+// If IN Telegram → check if user is in ALLOWED list (server-side does this too).
+const isInsideTelegram = !!tgWebApp && !!tgWebApp.initDataUnsafe?.user;
+
+if (!isInsideTelegram) {
+  // Not inside Telegram — show minimal status page only
+  document.addEventListener("DOMContentLoaded", () => {
+    document.body.innerHTML = `
+      <div style="
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        min-height: 100vh; background: #000; color: #FF6B00; font-family: Inter, system-ui, sans-serif;
+        gap: 16px; padding: 20px; text-align: center;
+      ">
+        <div style="font-size: 48px; font-weight: 900; letter-spacing: -2px;">LIVE</div>
+        <div style="width: 60px; height: 3px; background: #FF6B00; border-radius: 2px;"></div>
+        <div style="font-size: 14px; color: #777; margin-top: 8px;">Bot is Live</div>
+        <div style="font-size: 11px; color: #444; margin-top: 20px;">
+          Access is restricted to Telegram only.<br>Open this bot inside Telegram to use the app.
+        </div>
+      </div>`;
+  });
+  // Stop all JS execution — nothing else should run
+  throw new Error("Not in Telegram context — app blocked.");
+}
+
+const tgUser = tgWebApp.initDataUnsafe.user || {
   id: 999999999,
   first_name: "Test",
   username: "test_user"
@@ -950,20 +978,32 @@ async function init() {
   loadEl.classList.add("hidden");
   setTimeout(() => loadEl.remove(), 500);
 
-  // Track presence - notify when leaving
+  // ── Presence tracking ──────────────────────────────────────────
+  // Method 1: Telegram WebApp close event (most reliable)
+  if (tgWebApp) {
+    tgWebApp.onEvent("close", () => {
+      sendOfflinePing();
+    });
+  }
+
+  // Method 2: beforeunload with proper Content-Type for sendBeacon
   window.addEventListener("beforeunload", () => {
-    navigator.sendBeacon(
-      API_BASE + "/api/presence/offline/",
-      JSON.stringify({ tg_id: tgUser.id })
-    );
+    sendOfflinePing();
   });
 
-  // Also send offline via fetch on visibility change
+  // Method 3: visibility change (tab hidden)
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
-      apiPost("/api/presence/offline/");
+      sendOfflinePing();
     }
   });
+
+  // Periodic presence heartbeat (every 2 min) to keep online status accurate
+  setInterval(() => {
+    if (!document.hidden) {
+      apiGet(`/api/dashboard/?tg_id=${tgUser.id}&name=${encodeURIComponent(tgUser.first_name)}`).catch(() => {});
+    }
+  }, 120000);
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -973,6 +1013,32 @@ async function init() {
 async function apiGet(url) {
   const res = await fetch(API_BASE + url);
   return res.json();
+}
+
+/**
+ * Send offline ping using multiple fallback methods.
+ * - sendBeacon with proper Content-Type blob (works on page close)
+ * - fetch with keepalive as fallback
+ */
+function sendOfflinePing() {
+  const url = API_BASE + "/api/presence/offline/";
+  const payload = JSON.stringify({ tg_id: tgUser.id });
+
+  // Method 1: sendBeacon with proper Content-Type
+  try {
+    const blob = new Blob([payload], { type: "application/json" });
+    navigator.sendBeacon(url, blob);
+  } catch (e) {
+    // Fallback: fetch with keepalive
+    try {
+      fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: payload,
+        keepalive: true,
+      }).catch(() => {});
+    } catch (e2) {}
+  }
 }
 
 async function apiPost(url, body = {}) {
@@ -1084,7 +1150,7 @@ async function checkRoutine(id) {
 }
 
 async function deleteRoutine(id) {
-  const res = await apiDelete(`/api/routines/${id}/`);
+  const res = await apiDelete(`/api/routines/${id}/delete/`);
   if (res.ok) {
     state.routines = state.routines.filter(r => r.id !== id);
     renderRoutines();
@@ -1242,7 +1308,7 @@ async function addNote() {
 
 async function deleteNote(id, btn) {
   btn.disabled = true;
-  const res = await apiDelete(`/api/notes/${id}/`);
+  const res = await apiDelete(`/api/notes/${id}/delete/`);
   if (res.ok) {
     state.notes = state.notes.filter(n => n.id !== id);
     renderNotes();
@@ -1358,7 +1424,7 @@ async function toggleTodo(id) {
 }
 
 async function deleteTodo(id, listType) {
-  const res = await apiDelete(`/api/todos/${id}/`);
+  const res = await apiDelete(`/api/todos/${id}/delete/`);
   if (res.ok) {
     if (listType === "shared") state.sharedTodos = state.sharedTodos.filter(t => t.id !== id);
     else state.myTodos = state.myTodos.filter(t => t.id !== id);

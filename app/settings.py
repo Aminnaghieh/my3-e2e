@@ -18,8 +18,6 @@ Environment variables (set in Render):
 
 import os
 from pathlib import Path
-import dj_database_url
-
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -81,12 +79,13 @@ TEMPLATES = [
 WSGI_APPLICATION = "app.wsgi.application"
 
 # ── Database ──────────────────────────────────────────────────────────────────
-
 DATABASES = {
-    "default": dj_database_url.config(
-        default=os.environ.get("DATABASE_URL", f"sqlite:///{BASE_DIR / 'db.sqlite3'}")
-    )
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
+    }
 }
+
 # ── Internationalization ──────────────────────────────────────────────────────
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "Asia/Tehran"
