@@ -912,7 +912,7 @@ def ai_chat(request):
     history = list(reversed(list(recent)))
 
     try:
-        model = genai.GenerativeModel("gemini-3.1-flash-light")
+        model = genai.GenerativeModel("gemini-3.5-flash")
 
         # Build conversation
         chat_history = []
